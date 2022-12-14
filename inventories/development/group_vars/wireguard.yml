@@ -5,3 +5,5 @@ wireguard_peers:
   - name: flaudisio-laptop
     pubkey: fm48aIvoZM9GfpZk3NqaiikG0jAMS2ojokwKXX/C4Tg=
     ip: 10.8.0.2
+
+wireguard_configure_iptables: true
