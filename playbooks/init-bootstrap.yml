@@ -1,0 +1,27 @@
+---
+- name: Bootstrap tasks
+  hosts: all
+  gather_facts: false
+  tags: [bootstrap]
+
+  tasks:
+    - name: Install Python 3 (apt)
+      ansible.builtin.raw: >
+        set -e &&
+        if command -v apt ; then
+          echo apt update -q ;
+          echo apt install -q -y python3 ;
+        fi
+      args:
+        executable: /bin/bash
+    - name: Install Python 3 (dnf/yum)
+      ansible.builtin.raw: >
+        set -e &&
+        for cmd in dnf yum ; do
+          if command -v "$cmd" ; then
+            echo "$cmd" install -y python3 ;
+            break ;
+          fi
+        done
+      args:
+        executable: /bin/bash

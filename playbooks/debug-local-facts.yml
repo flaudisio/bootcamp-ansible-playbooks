@@ -1,0 +1,12 @@
+---
+- name: Get local facts
+  hosts: all
+
+  tasks:
+    - name: Get local facts
+      ansible.builtin.setup:
+      register: facts_result
+
+    - name: Show local facts
+      ansible.builtin.debug:
+        var: facts_result
