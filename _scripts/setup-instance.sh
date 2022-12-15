@@ -12,6 +12,17 @@ readonly RepoDir="/tmp/ansible-playbooks"
 
 readonly VirtualEnvDir="/tmp/ansible-venv"
 
+: "${LOG_FILE:="/var/log/user-data.log"}"
+: "${DISABLE_OUTPUT_REDIRECT:=""}"
+
+
+if [[ -z "$DISABLE_OUTPUT_REDIRECT" ]] ; then
+    # Ref: https://stackoverflow.com/a/314678/5463829
+    exec > >( tee -a "$LOG_FILE" ) 2>&1
+
+    echo "Notice: redirecting all script output to $LOG_FILE" >&2
+fi
+
 
 _msg()
 {
