@@ -7,6 +7,8 @@
 #
 ##
 
+set -o pipefail
+
 readonly ProgramName="setup-instance"
 readonly ProgramVersion="0.1.0"
 
