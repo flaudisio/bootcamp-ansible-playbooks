@@ -53,7 +53,11 @@ _run()
 
 check_required_vars()
 {
-    local -r required_vars=( PLAYBOOK INVENTORY )
+    local -r required_vars=(
+        ENVIRONMENT
+        INVENTORY
+        PLAYBOOK
+    )
     local var_name
     local error=0
 
@@ -96,18 +100,42 @@ install_ansible()
     _run make -C "$RepoDir" install-all VENV_DIR="$VirtualEnvDir"
 
     export PATH="${VirtualEnvDir}/bin:${PATH}"
+}
 
+check_required_files()
+{
+    local file
+    local error=0
+
+    _msg "--> Checking required files"
+
+    for file in "$@" ; do
+        if [[ ! -f "$file" ]] ; then
+            _msg "Error: file '$file' not found"
+            error=1
+        fi
+    done
+
+    return $error
 }
 
 run_ansible()
 {
-    _msg "--> ${FUNCNAME[0]}"
+    local -r inventory_file="inventories/${ENVIRONMENT}/${INVENTORY}"
+    local -r playbook_file="playbooks/${PLAYBOOK}"
 
-    if ! (
+    local error_count=0
+    local max_retries=2
+
+    (
         _run cd "$RepoDir"
 
-        # Simple ping test to help debugging in case of any problems
-        _run ansible all --connection local --inventory "inventories/${INVENTORY}" -m ping
+        if ! check_required_files "$inventory_file" "$playbook_file" ; then
+            exit 1
+        fi
+
+        _msg "--> Running Ansible tasks"
+
         # Basic commands to help debugging in case of errors
         _run ansible --version
         _run ansible all --connection local --inventory "$inventory_file" -m ping
