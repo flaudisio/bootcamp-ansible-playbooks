@@ -72,7 +72,9 @@ check_required_vars()
         fi
     done
 
-    [[ $error -ne 0 ]] && exit 2 || return 0
+    [[ $error -ne 0 ]] && exit 2
+
+    return 0
 }
 
 install_deps()
