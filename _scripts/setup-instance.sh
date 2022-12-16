@@ -33,27 +33,22 @@ _run()
 {
     _msg "+ $*"
 
-    local retries=0
+    local exit_on_error=1
 
-    if [[ "$1" =~ ^--retry=[0-9]+$ ]] ; then
-        retries="${1#*=}"
+    if [[ "$1" == "--no-exit" ]] ; then
+        exit_on_error=0
         shift
     fi
 
-    while true ; do
-        # Exit if command is successful
-        "$@" && return 0
-
-        if [[ $retries -eq 0 ]] ; then
-            _msg "Error running command and no retries left; exiting"
+    if ! "$@" ; then
+        if [[ $exit_on_error -eq 1 ]] ; then
+            _msg "Error running command; exiting"
             exit 1
         fi
 
-        _msg "WARNING: error running command. Retries left: $retries"
-
-        (( retries-- ))
-        sleep 1
-    done
+        _msg "Warning: error running command"
+        return 1
+    fi
 }
 
 check_required_vars()
@@ -102,7 +97,6 @@ install_ansible()
 
     export PATH="${VirtualEnvDir}/bin:${PATH}"
 
-    _run ansible --version
 }
 
 run_ansible()
@@ -114,13 +108,27 @@ run_ansible()
 
         # Simple ping test to help debugging in case of any problems
         _run ansible all --connection local --inventory "inventories/${INVENTORY}" -m ping
+        # Basic commands to help debugging in case of errors
+        _run ansible --version
+        _run ansible all --connection local --inventory "$inventory_file" -m ping
 
-        # Run the machine's playbook
-        _run --retry=2 ansible-playbook --connection local --inventory "inventories/${INVENTORY}" "playbooks/${PLAYBOOK}"
+        # Run the Ansible playbook. Retry up to $max_retries times to be more resilient in case of intermittent errors
+        # (e.g. network timeouts)
+        while [[ $error_count -le $max_retries ]] ; do
+            if _run --no-exit ansible-playbook --connection local --inventory "$inventory_file" "$playbook_file" ; then
+                # Command was successful, exit the loop
+                break
+            fi
+
+            (( error_count++ ))
+
+            _msg "Warning: error running Ansible; retrying (${error_count}/${max_retries})"
+            sleep 2
+        done
     )
-    then
-        exit 1
-    fi
+
+    # shellcheck disable=SC2181
+    [[ $? -ne 0 ]] && exit 1
 }
 
 do_cleanup()
