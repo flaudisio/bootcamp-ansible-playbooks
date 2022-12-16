@@ -178,14 +178,14 @@ main()
 {
     _msg "Starting ${ProgramName} v${ProgramVersion} at $( date --utc )"
 
+    trap do_cleanup EXIT
+
     check_required_vars
 
     install_deps
     clone_repo
     install_ansible
     run_ansible
-
-    do_cleanup
 
     _msg "Success!"
 }
