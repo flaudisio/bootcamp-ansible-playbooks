@@ -16,6 +16,7 @@ readonly RepoUrl="https://github.com/flaudisio/bootcamp-sre-ansible-playbooks.gi
 readonly TempPlaybooksDir="/tmp/ansible-playbooks-repo"
 readonly TempVenvDir="/tmp/ansible-playbooks-venv"
 
+: "${REPO_BRANCH:="main"}"
 : "${LOG_FILE:="/var/log/user-data.log"}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
 
@@ -94,7 +95,7 @@ clone_playbooks_repo()
         return 0
     fi
 
-    _run git clone --depth 1 "$RepoUrl" "$TempPlaybooksDir"
+    _run git clone --branch "$REPO_BRANCH" --depth 1 "$RepoUrl" "$TempPlaybooksDir"
 }
 
 install_ansible()
