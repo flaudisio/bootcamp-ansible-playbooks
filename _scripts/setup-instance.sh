@@ -81,8 +81,8 @@ install_deps()
 {
     _msg "--> Installing system dependencies"
 
-    _run apt update -q
-    _run apt install -q -y --no-install-recommends git make python3 python3-venv
+    DEBIAN_FRONTEND=noninteractive _run apt update -q
+    DEBIAN_FRONTEND=noninteractive _run apt install -q -y --no-install-recommends git make python3 python3-venv
 }
 
 clone_repo()
@@ -169,7 +169,7 @@ do_cleanup()
 
     _run rm -rf "$TempPlaybooksDir" "$TempVenvDir"
 
-    _run apt purge -q -y make
+    DEBIAN_FRONTEND=noninteractive _run apt purge -q -y make
 
     _msg "Program finished at $( date --utc )"
 }
