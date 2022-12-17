@@ -13,8 +13,8 @@ readonly ProgramName="setup-instance"
 readonly ProgramVersion="0.1.0"
 
 readonly RepoUrl="https://github.com/flaudisio/bootcamp-sre-ansible-playbooks.git"
-readonly RepoDir="/tmp/ansible-playbooks"
-readonly VirtualEnvDir="/tmp/ansible-venv"
+readonly TempPlaybooksDir="/tmp/ansible-playbooks-repo"
+readonly TempVenvDir="/tmp/ansible-playbooks-venv"
 
 : "${LOG_FILE:="/var/log/user-data.log"}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
@@ -89,21 +89,21 @@ clone_repo()
 {
     _msg "--> Cloning Git repository"
 
-    if [[ -d "$RepoDir" ]] ; then
-        _msg "Repository dir '$RepoDir' already exists; skipping 'git clone'"
+    if [[ -d "$TempPlaybooksDir" ]] ; then
+        _msg "Repository dir '$TempPlaybooksDir' already exists; skipping 'git clone'"
         return 0
     fi
 
-    _run git clone --depth 1 "$RepoUrl" "$RepoDir"
+    _run git clone --depth 1 "$RepoUrl" "$TempPlaybooksDir"
 }
 
 install_ansible()
 {
     _msg "--> Installing Ansible"
 
-    _run make -C "$RepoDir" install-all VENV_DIR="$VirtualEnvDir"
+    _run make -C "$TempPlaybooksDir" install-all VENV_DIR="$TempVenvDir"
 
-    export PATH="${VirtualEnvDir}/bin:${PATH}"
+    export PATH="${TempVenvDir}/bin:${PATH}"
 }
 
 check_required_files()
@@ -132,7 +132,7 @@ run_ansible()
     local max_retries=2
 
     (
-        _run cd "$RepoDir"
+        _run cd "$TempPlaybooksDir"
 
         if ! check_required_files "$inventory_file" "$playbook_file" ; then
             exit 1
@@ -167,7 +167,7 @@ do_cleanup()
 {
     _msg "--> Cleaning up"
 
-    _run rm -rf "$RepoDir" "$VirtualEnvDir"
+    _run rm -rf "$TempPlaybooksDir" "$TempVenvDir"
 
     _run apt purge -q -y make
 
