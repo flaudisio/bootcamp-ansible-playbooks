@@ -77,7 +77,7 @@ check_required_vars()
     return 0
 }
 
-install_deps()
+install_system_deps()
 {
     _msg "--> Installing system dependencies"
 
@@ -85,7 +85,7 @@ install_deps()
     DEBIAN_FRONTEND=noninteractive _run apt install -q -y --no-install-recommends git make python3 python3-venv
 }
 
-clone_repo()
+clone_playbooks_repo()
 {
     _msg "--> Cloning Git repository"
 
@@ -106,7 +106,7 @@ install_ansible()
     export PATH="${TempVenvDir}/bin:${PATH}"
 }
 
-check_required_files()
+assert_files_exist()
 {
     local file
     local error=0
@@ -123,7 +123,7 @@ check_required_files()
     return $error
 }
 
-run_ansible()
+bootstrap_machine_with_ansible()
 {
     local -r inventory_file="inventories/${ENVIRONMENT}/${INVENTORY}"
     local -r playbook_file="playbooks/${PLAYBOOK}"
@@ -181,11 +181,10 @@ main()
     trap do_cleanup EXIT
 
     check_required_vars
-
-    install_deps
-    clone_repo
+    install_system_deps
+    clone_playbooks_repo
     install_ansible
-    run_ansible
+    bootstrap_machine_with_ansible
 
     _msg "Success!"
 }
