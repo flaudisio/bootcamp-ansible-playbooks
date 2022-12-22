@@ -19,6 +19,7 @@ readonly TempVenvDir="/tmp/setup-instance-ansible-venv"
 : "${REPO_BRANCH:="main"}"
 : "${LOG_FILE:="/var/log/user-data.log"}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
+: "${DISABLE_CLEANUP:=""}"
 
 if [[ -z "$DISABLE_OUTPUT_REDIRECT" ]] ; then
     # Ref: https://stackoverflow.com/a/314678/5463829
@@ -172,11 +173,15 @@ bootstrap_machine_with_ansible()
 
 do_cleanup()
 {
-    _msg "--> Cleaning up"
+    if [[ -n "$DISABLE_CLEANUP" ]] ; then
+        _msg "Notice: DISABLE_CLEANUP variable set; skipping cleanup"
+    else
+        _msg "--> Cleaning up"
 
-    _run rm -rf "$TempPlaybooksDir" "$TempVenvDir"
+        _run rm -rf "$TempPlaybooksDir" "$TempVenvDir"
 
-    DEBIAN_FRONTEND=noninteractive _run apt purge -q -y make
+        DEBIAN_FRONTEND=noninteractive _run apt purge -q -y make
+    fi
 
     _msg "Program finished at $( date --utc )"
 }
