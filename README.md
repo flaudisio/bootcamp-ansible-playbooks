@@ -36,3 +36,33 @@ Para remover o virtualenv do Ansible e quaisquer collections/roles baixadas, exe
 ```console
 $ make uninstall
 ```
+
+## Provisionando novas instâncias EC2
+
+### Via user data
+
+Utilize o script `setup-instance.sh` no user data da instância. Exemplo:
+
+```sh
+#!/bin/bash
+
+export ENVIRONMENT="development"
+export INVENTORY="wireguard.ini"
+export PLAYBOOK="deploy-wireguard.yml"
+
+curl -L "https://raw.githubusercontent.com/flaudisio/bootcamp-sre-ansible-playbooks/main/_scripts/setup-instance.sh" | bash
+```
+
+### Via Ansible
+
+Para provisionar uma instância que não foi inicializada via user data, utilize os playbooks de inicialização. Exemplo:
+
+```console
+$ export ANSIBLE_PRIVATE_KEY_FILE=~/.ssh/wireguard.pem
+$ export ENVIRONMENT="development"
+$ export INVENTORY="wireguard.ini"
+$ export PLAYBOOK="deploy-wireguard.yml"
+
+$ ansible-playbook -i inventories/development/wireguard.ini playbooks/init-ansible-venv.yml
+$ ansible-playbook -i inventories/development/wireguard.ini playbooks/init-instance.yml
+```
