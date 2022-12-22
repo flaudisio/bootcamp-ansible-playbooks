@@ -21,12 +21,13 @@ readonly TempVenvDir="/tmp/setup-instance-ansible-venv"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
 : "${DISABLE_CLEANUP:=""}"
 
+# Start logging to file as soon as possible
 if [[ -z "$DISABLE_OUTPUT_REDIRECT" ]] ; then
     # Ref: https://stackoverflow.com/a/314678/5463829
     exec > >( tee -a "$LOG_FILE" ) 2>&1
-
     echo "Notice: redirecting all script output to $LOG_FILE" >&2
 fi
+
 
 _msg()
 {
@@ -44,15 +45,15 @@ _run()
         shift
     fi
 
-    if ! "$@" ; then
-        if [[ $exit_on_error -eq 1 ]] ; then
-            _msg "Error running command; exiting"
-            exit 1
-        fi
+    "$@" && return 0
 
-        _msg "Warning: error running command"
-        return 1
+    if [[ $exit_on_error -eq 1 ]] ; then
+        _msg "Error running command; exiting"
+        exit 1
     fi
+
+    _msg "Warning: error running command"
+    return 1
 }
 
 _run_with_retry()
@@ -79,11 +80,7 @@ _run_with_retry()
 
 check_required_vars()
 {
-    local -r required_vars=(
-        ENVIRONMENT
-        INVENTORY
-        PLAYBOOK
-    )
+    local -r required_vars=( ENVIRONMENT INVENTORY PLAYBOOK )
     local var_name
     local error=0
 
@@ -111,7 +108,7 @@ install_system_deps()
 
 clone_playbooks_repo()
 {
-    _msg "--> Cloning Git repository"
+    _msg "--> Cloning playbooks repository"
 
     if [[ -d "$TempPlaybooksDir" ]] ; then
         _msg "Repository dir '$TempPlaybooksDir' already exists; skipping 'git clone'"
@@ -130,12 +127,12 @@ install_ansible()
     export PATH="${TempVenvDir}/bin:${PATH}"
 }
 
-assert_files_exist()
+_assert_files_exist()
 {
     local file
     local error=0
 
-    _msg "--> Checking required files"
+    _msg "--> Checking if files exist"
 
     for file in "$@" ; do
         if [[ ! -f "$file" ]] ; then
