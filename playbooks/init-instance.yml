@@ -1,0 +1,37 @@
+---
+- name: Initialize instance with setup script
+  hosts: all
+  tags: init-instance
+
+  vars:
+    setup_script_path: /tmp/setup-instance.sh
+    instance_environment: "{{ lookup('ansible.builtin.env', 'ENVIRONMENT') }}"
+    instance_inventory: "{{ lookup('ansible.builtin.env', 'INVENTORY') }}"
+    instance_playbook: "{{ lookup('ansible.builtin.env', 'PLAYBOOK') }}"
+
+  tasks:
+    - name: Assert required variables are defined
+      ansible.builtin.assert:
+        that:
+          - instance_environment != ""
+          - instance_inventory != ""
+          - instance_playbook != ""
+        fail_msg: >
+          You must define all the following environment variables: ENVIRONMENT, INVENTORY, PLAYBOOK.
+        success_msg: >
+          All required variables are defined.
+
+    - name: Copy setup script to host
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../_scripts/setup-instance.sh"
+        dest: "{{ setup_script_path }}"
+        owner: root
+        group: root
+        mode: 0700
+
+    - name: Run setup script
+      ansible.builtin.command: "{{ setup_script_path }}"
+      environment:
+        ENVIRONMENT: "{{ instance_environment }}"
+        INVENTORY: "{{ instance_inventory }}"
+        PLAYBOOK: "{{ instance_playbook }}"

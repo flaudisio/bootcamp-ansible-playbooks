@@ -13,8 +13,8 @@ readonly ProgramName="setup-instance"
 readonly ProgramVersion="0.1.0"
 
 readonly RepoUrl="https://github.com/flaudisio/bootcamp-sre-ansible-playbooks.git"
-readonly TempPlaybooksDir="/tmp/ansible-playbooks-repo"
-readonly TempVenvDir="/tmp/ansible-playbooks-venv"
+readonly TempPlaybooksDir="/tmp/setup-instance-ansible-playbooks"
+readonly TempVenvDir="/tmp/setup-instance-ansible-venv"
 
 : "${REPO_BRANCH:="main"}"
 : "${LOG_FILE:="/var/log/user-data.log"}"
@@ -54,6 +54,28 @@ _run()
     fi
 }
 
+_run_with_retry()
+{
+    local retry_count=0
+    local max_retries=2
+
+    # Retry up to $max_retries times to be more resilient in case of intermittent errors (e.g. network timeouts)
+    while [[ $retry_count -le $max_retries ]] ; do
+        if _run --no-exit "$@" ; then
+            # Command was successful, exit function
+            return 0
+        fi
+
+        (( retry_count++ ))
+
+        _msg "Warning: error running command; retrying (${retry_count}/${max_retries})"
+        sleep 2
+    done
+
+    _msg "Unrecoverable error running command; exiting"
+    exit 1
+}
+
 check_required_vars()
 {
     local -r required_vars=(
@@ -83,7 +105,7 @@ install_system_deps()
     _msg "--> Installing system dependencies"
 
     DEBIAN_FRONTEND=noninteractive _run apt update -q
-    DEBIAN_FRONTEND=noninteractive _run apt install -q -y --no-install-recommends git make python3 python3-venv
+    DEBIAN_FRONTEND=noninteractive _run apt install -q -y --no-install-recommends git make
 }
 
 clone_playbooks_repo()
@@ -128,40 +150,24 @@ bootstrap_machine_with_ansible()
 {
     local -r inventory_file="inventories/${ENVIRONMENT}/${INVENTORY}"
     local -r playbook_file="playbooks/${PLAYBOOK}"
+    local ansible_opts=( --connection "local" --inventory "$inventory_file" )
 
-    local error_count=0
-    local max_retries=2
+    _run pushd "$TempPlaybooksDir"
 
-    (
-        _run cd "$TempPlaybooksDir"
+    _assert_files_exist "$inventory_file" "$playbook_file" || exit 1
 
-        if ! check_required_files "$inventory_file" "$playbook_file" ; then
-            exit 1
-        fi
+    _msg "--> Running Ansible tasks"
 
-        _msg "--> Running Ansible tasks"
+    # Output Ansible version to help on troubleshooting
+    _run ansible --version
 
-        # Basic commands to help debugging in case of errors
-        _run ansible --version
-        _run ansible all --connection local --inventory "$inventory_file" -m ping
+    # Run bootstrap tasks
+    _run_with_retry ansible-playbook playbooks/init-ansible-venv.yml --verbose "${ansible_opts[@]}"
 
-        # Run the Ansible playbook. Retry up to $max_retries times to be more resilient in case of intermittent errors
-        # (e.g. network timeouts)
-        while [[ $error_count -le $max_retries ]] ; do
-            if _run --no-exit ansible-playbook --connection local --inventory "$inventory_file" "$playbook_file" ; then
-                # Command was successful, exit the loop
-                break
-            fi
+    # Run the node role tasks
+    _run_with_retry ansible-playbook "$playbook_file" "${ansible_opts[@]}"
 
-            (( error_count++ ))
-
-            _msg "Warning: error running Ansible; retrying (${error_count}/${max_retries})"
-            sleep 2
-        done
-    )
-
-    # shellcheck disable=SC2181
-    [[ $? -ne 0 ]] && exit 1
+    _run popd
 }
 
 do_cleanup()

@@ -29,27 +29,27 @@
 
 - name: Bootstrap - Setup Ansible management virtualenv
   hosts: all
-  tags: bootstrap:management-venv
+  tags: bootstrap:venv
 
   vars:
     ansible_python_interpreter: /usr/bin/env python3
-    bootstrap_management_venv_dir: /opt/ansible-venv
-    bootstrap_requirements_file: /tmp/requirements.txt
+    management_venv_dir: /opt/ansible-venv
+    requirements_file: /tmp/requirements.txt
 
   tasks:
     - name: Copy requirements file to host
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/../requirements.txt"
-        dest: "{{ bootstrap_requirements_file }}"
+        dest: "{{ requirements_file }}"
         owner: root
         group: root
         mode: 0644
 
     - name: Install dependencies to the management virtualenv
       ansible.builtin.pip:
-        requirements: "{{ bootstrap_requirements_file }}"
-        virtualenv: "{{ bootstrap_management_venv_dir }}"
-        virtualenv_command: python3 -m venv --upgrade "{{ bootstrap_management_venv_dir }}"
+        requirements: "{{ requirements_file }}"
+        virtualenv: "{{ management_venv_dir }}"
+        virtualenv_command: python3 -m venv --upgrade "{{ management_venv_dir }}"
       register: pip_output
       changed_when: >
         (pip_output.stdout_lines | select("match", "^Requirement already satisfied") | length) != (pip_output.stdout_lines | length)
