@@ -13,18 +13,21 @@ readonly ProgramName="setup-instance"
 readonly ProgramVersion="0.1.0"
 
 readonly RepoUrl="https://github.com/flaudisio/bootcamp-sre-ansible-playbooks.git"
-readonly RepoDir="/tmp/ansible-playbooks"
-readonly VirtualEnvDir="/tmp/ansible-venv"
+readonly TempPlaybooksDir="/tmp/setup-instance-ansible-playbooks"
+readonly TempVenvDir="/tmp/setup-instance-ansible-venv"
 
+: "${REPO_BRANCH:="main"}"
 : "${LOG_FILE:="/var/log/user-data.log"}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
+: "${DISABLE_CLEANUP:=""}"
 
+# Start logging to file as soon as possible
 if [[ -z "$DISABLE_OUTPUT_REDIRECT" ]] ; then
     # Ref: https://stackoverflow.com/a/314678/5463829
     exec > >( tee -a "$LOG_FILE" ) 2>&1
-
     echo "Notice: redirecting all script output to $LOG_FILE" >&2
 fi
+
 
 _msg()
 {
@@ -42,24 +45,42 @@ _run()
         shift
     fi
 
-    if ! "$@" ; then
-        if [[ $exit_on_error -eq 1 ]] ; then
-            _msg "Error running command; exiting"
-            exit 1
+    "$@" && return 0
+
+    if [[ $exit_on_error -eq 1 ]] ; then
+        _msg "Error running command; exiting"
+        exit 1
+    fi
+
+    _msg "Warning: error running command"
+    return 1
+}
+
+_run_with_retry()
+{
+    local retry_count=0
+    local max_retries=2
+
+    # Retry up to $max_retries times to be more resilient in case of intermittent errors (e.g. network timeouts)
+    while [[ $retry_count -le $max_retries ]] ; do
+        if _run --no-exit "$@" ; then
+            # Command was successful, exit function
+            return 0
         fi
 
-        _msg "Warning: error running command"
-        return 1
-    fi
+        (( retry_count++ ))
+
+        _msg "Warning: error running command; retrying (${retry_count}/${max_retries})"
+        sleep 2
+    done
+
+    _msg "Unrecoverable error running command; exiting"
+    exit 1
 }
 
 check_required_vars()
 {
-    local -r required_vars=(
-        ENVIRONMENT
-        INVENTORY
-        PLAYBOOK
-    )
+    local -r required_vars=( ENVIRONMENT INVENTORY PLAYBOOK )
     local var_name
     local error=0
 
@@ -77,41 +98,41 @@ check_required_vars()
     return 0
 }
 
-install_deps()
+install_system_deps()
 {
     _msg "--> Installing system dependencies"
 
-    _run apt update -q
-    _run apt install -q -y --no-install-recommends git make python3 python3-venv
+    DEBIAN_FRONTEND=noninteractive _run apt update -q
+    DEBIAN_FRONTEND=noninteractive _run apt install -q -y --no-install-recommends git make
 }
 
-clone_repo()
+clone_playbooks_repo()
 {
-    _msg "--> Cloning Git repository"
+    _msg "--> Cloning playbooks repository"
 
-    if [[ -d "$RepoDir" ]] ; then
-        _msg "Repository dir '$RepoDir' already exists; skipping 'git clone'"
+    if [[ -d "$TempPlaybooksDir" ]] ; then
+        _msg "Repository dir '$TempPlaybooksDir' already exists; skipping 'git clone'"
         return 0
     fi
 
-    _run git clone --depth 1 "$RepoUrl" "$RepoDir"
+    _run git clone --branch "$REPO_BRANCH" --depth 1 "$RepoUrl" "$TempPlaybooksDir"
 }
 
 install_ansible()
 {
     _msg "--> Installing Ansible"
 
-    _run make -C "$RepoDir" install-all VENV_DIR="$VirtualEnvDir"
+    _run make -C "$TempPlaybooksDir" install-all VENV_DIR="$TempVenvDir"
 
-    export PATH="${VirtualEnvDir}/bin:${PATH}"
+    export PATH="${TempVenvDir}/bin:${PATH}"
 }
 
-check_required_files()
+_assert_files_exist()
 {
     local file
     local error=0
 
-    _msg "--> Checking required files"
+    _msg "--> Checking if files exist"
 
     for file in "$@" ; do
         if [[ ! -f "$file" ]] ; then
@@ -123,53 +144,41 @@ check_required_files()
     return $error
 }
 
-run_ansible()
+bootstrap_machine_with_ansible()
 {
     local -r inventory_file="inventories/${ENVIRONMENT}/${INVENTORY}"
     local -r playbook_file="playbooks/${PLAYBOOK}"
+    local ansible_opts=( --connection "local" --inventory "$inventory_file" )
 
-    local error_count=0
-    local max_retries=2
+    _run pushd "$TempPlaybooksDir"
 
-    (
-        _run cd "$RepoDir"
+    _assert_files_exist "$inventory_file" "$playbook_file" || exit 1
 
-        if ! check_required_files "$inventory_file" "$playbook_file" ; then
-            exit 1
-        fi
+    _msg "--> Running Ansible tasks"
 
-        _msg "--> Running Ansible tasks"
+    # Output Ansible version to help on troubleshooting
+    _run ansible --version
 
-        # Basic commands to help debugging in case of errors
-        _run ansible --version
-        _run ansible all --connection local --inventory "$inventory_file" -m ping
+    # Run bootstrap tasks
+    _run_with_retry ansible-playbook playbooks/init-ansible-venv.yml --verbose "${ansible_opts[@]}"
 
-        # Run the Ansible playbook. Retry up to $max_retries times to be more resilient in case of intermittent errors
-        # (e.g. network timeouts)
-        while [[ $error_count -le $max_retries ]] ; do
-            if _run --no-exit ansible-playbook --connection local --inventory "$inventory_file" "$playbook_file" ; then
-                # Command was successful, exit the loop
-                break
-            fi
+    # Run the node role tasks
+    _run_with_retry ansible-playbook "$playbook_file" "${ansible_opts[@]}"
 
-            (( error_count++ ))
-
-            _msg "Warning: error running Ansible; retrying (${error_count}/${max_retries})"
-            sleep 2
-        done
-    )
-
-    # shellcheck disable=SC2181
-    [[ $? -ne 0 ]] && exit 1
+    _run popd
 }
 
 do_cleanup()
 {
-    _msg "--> Cleaning up"
+    if [[ -n "$DISABLE_CLEANUP" ]] ; then
+        _msg "Notice: DISABLE_CLEANUP variable set; skipping cleanup"
+    else
+        _msg "--> Cleaning up"
 
-    _run rm -rf "$RepoDir" "$VirtualEnvDir"
+        _run rm -rf "$TempPlaybooksDir" "$TempVenvDir"
 
-    _run apt purge -q -y make
+        DEBIAN_FRONTEND=noninteractive _run apt purge -q -y make
+    fi
 
     _msg "Program finished at $( date --utc )"
 }
@@ -181,11 +190,10 @@ main()
     trap do_cleanup EXIT
 
     check_required_vars
-
-    install_deps
-    clone_repo
+    install_system_deps
+    clone_playbooks_repo
     install_ansible
-    run_ansible
+    bootstrap_machine_with_ansible
 
     _msg "Success!"
 }

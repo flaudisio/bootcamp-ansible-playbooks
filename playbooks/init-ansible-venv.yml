@@ -1,0 +1,55 @@
+---
+- name: Bootstrap - Install Python
+  hosts: all
+  gather_facts: false
+  tags: bootstrap:python
+
+  tasks:
+    - name: Install Python 3 using raw module (apt)
+      ansible.builtin.raw: >
+        set -e &&
+        if command -v apt ; then
+          DEBIAN_FRONTEND=noninteractive apt update -q ;
+          DEBIAN_FRONTEND=noninteractive apt install -q -y python3 ;
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Install Python 3 using raw module (dnf/yum)
+      ansible.builtin.raw: >
+        set -e &&
+        for cmd in dnf yum ; do
+          if command -v "$cmd" ; then
+            "$cmd" install -y python3 ;
+            break ;
+          fi
+        done
+      args:
+        executable: /bin/bash
+
+- name: Bootstrap - Setup Ansible management virtualenv
+  hosts: all
+  tags: bootstrap:venv
+
+  vars:
+    ansible_python_interpreter: /usr/bin/env python3
+    management_venv_dir: /opt/ansible-venv
+    requirements_file: /tmp/requirements.txt
+
+  tasks:
+    - name: Copy requirements file to host
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../requirements.txt"
+        dest: "{{ requirements_file }}"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Install dependencies to the management virtualenv
+      ansible.builtin.pip:
+        requirements: "{{ requirements_file }}"
+        virtualenv: "{{ management_venv_dir }}"
+        virtualenv_command: python3 -m venv --upgrade "{{ management_venv_dir }}"
+      register: pip_output
+      changed_when: >
+        (pip_output.stdout_lines | select("match", "^Requirement already satisfied") | length) != (pip_output.stdout_lines | length)
