@@ -1,0 +1,35 @@
+---
+wg_portal_version: 1.0.16
+
+wg_portal_server_dl_url: https://github.com/h44z/wg-portal/releases/download/v{{ wg_portal_version }}/wg-portal-arm64
+wg_portal_server_bin_path: /usr/local/bin/wg-portal
+
+wg_portal_working_dir: /var/opt/wg-portal
+
+wg_portal_env_file: /etc/wg-portal.env
+wg_portal_service_file: /etc/systemd/system/wg-portal.service
+
+# WireGuard Settings
+wg_portal_wg_devices: wg0
+wg_portal_wg_default_device: wg0
+wg_portal_wg_config_path: /etc/wireguard
+
+# Core Settings
+wg_portal_listening_address: 0.0.0.0:8123
+wg_portal_external_url: http://wg-portal.example.com:8123
+wg_portal_website_title: WireGuard Portal
+wg_portal_company_name: Example
+wg_portal_admin_user: admin@example.com
+wg_portal_admin_pass: ChangeMe!123
+wg_portal_admin_pass_ssm_parameter_enabled: false
+wg_portal_admin_pass_ssm_parameter_name: /wireguard/wg-portal-admin-password
+wg_portal_admin_pass_ssm_parameter_region: us-east-1
+
+# Mail Settings
+wg_portal_mail_from: ""
+wg_portal_email_host: ""
+wg_portal_email_port: ""
+wg_portal_email_encryption: ""
+wg_portal_email_cert_validation: ""
+wg_portal_email_username: ""
+wg_portal_email_password: ""
