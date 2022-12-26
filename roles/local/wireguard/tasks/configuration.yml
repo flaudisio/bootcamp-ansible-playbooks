@@ -1,0 +1,49 @@
+---
+- name: Check if private key exists
+  ansible.builtin.stat:
+    path: "{{ wireguard_private_key_file }}"
+  register: wireguard_key_check
+
+- name: Generate key pair
+  ansible.builtin.shell: >
+    wg genkey | tee '{{ wireguard_private_key_file }}' | wg pubkey > '{{ wireguard_public_key_file }}'
+  register: wireguard_genkey
+  changed_when: false
+  when: not wireguard_key_check.stat.exists
+
+- name: Ensure correct key file permissions
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: 0600
+  loop:
+    - "{{ wireguard_private_key_file }}"
+    - "{{ wireguard_public_key_file }}"
+
+- name: Load private key file contents
+  ansible.builtin.slurp:
+    src: "{{ wireguard_private_key_file }}"
+  register: wireguard_private_key_b64
+  no_log: "{{ ansible_verbosity < 3 }}"
+
+- name: Set private key variable
+  ansible.builtin.set_fact:
+    wireguard_private_key: "{{ wireguard_private_key_b64.content | b64decode | trim }}"
+  no_log: "{{ ansible_verbosity < 3 }}"
+
+- name: Create configuration file
+  ansible.builtin.template:
+    src: wg.conf.j2
+    dest: "{{ wireguard_config_file }}"
+    owner: root
+    group: root
+    mode: 0600
+  no_log: "{{ ansible_verbosity < 3 }}"
+  notify: Restart WireGuard
+
+- name: Ensure service is running
+  ansible.builtin.service:
+    name: "{{ wireguard_service_name }}"
+    state: started
+    enabled: true
