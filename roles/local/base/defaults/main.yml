@@ -2,6 +2,7 @@
 base_packages:
   - bzip2
   - cron
+  - iptables
   - rsync
   - unzip
   - zip
