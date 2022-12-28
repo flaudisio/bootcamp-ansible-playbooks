@@ -1,0 +1,9 @@
+---
+- name: Reload wg-portal daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart wg-portal
+  ansible.builtin.service:
+    name: wg-portal
+    state: restarted

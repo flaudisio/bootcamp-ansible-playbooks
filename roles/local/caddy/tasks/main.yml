@@ -1,0 +1,35 @@
+---
+- name: Include architecture-specific variables
+  ansible.builtin.include_vars:
+    file: "{{ ansible_architecture }}.yml"
+  tags: caddy:install
+
+- name: Check if v{{ caddy_version }} is installed
+  ansible.builtin.shell: dpkg-query --showformat='${Version}' --show caddy || true
+  register: caddy_check
+  changed_when: false
+  tags: caddy:install
+
+- name: Install package
+  ansible.builtin.apt:
+    deb: "{{ caddy_package_url }}"
+    state: present
+  when: caddy_check.stdout != caddy_version
+  tags: caddy:install
+
+- name: Configure Caddyfile
+  ansible.builtin.copy:
+    content: "{{ caddy_config }}"
+    dest: /etc/caddy/Caddyfile
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart Caddy
+  tags: caddy:config
+
+- name: Ensure service is running
+  ansible.builtin.service:
+    name: caddy
+    state: started
+    enabled: true
+  tags: caddy:config

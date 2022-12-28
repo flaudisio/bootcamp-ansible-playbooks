@@ -1,0 +1,51 @@
+---
+- name: Install server binary
+  ansible.builtin.get_url:
+    url: "{{ wg_portal_server_dl_url }}"
+    dest: "{{ wg_portal_server_bin_path }}"
+    force: true
+    owner: root
+    group: root
+    mode: 0755
+  tags: wg-portal:install
+
+- name: Ensure working directory exists
+  ansible.builtin.file:
+    path: "{{ wg_portal_working_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  tags: wg-portal:install
+
+- name: Create service file
+  ansible.builtin.template:
+    src: wg-portal.service.j2
+    dest: "{{ wg_portal_service_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Reload wg-portal daemon
+    - Restart wg-portal
+  tags:
+    - wg-portal:install
+    - wg-portal:config
+
+- name: Create environment file
+  ansible.builtin.template:
+    src: wg-portal.env.j2
+    dest: "{{ wg_portal_env_file }}"
+    owner: root
+    group: root
+    mode: 0600
+  no_log: "{{ ansible_verbosity < 3 }}"
+  notify: Restart wg-portal
+  tags: wg-portal:config
+
+- name: Ensure service is running
+  ansible.builtin.service:
+    name: wg-portal
+    state: started
+    enabled: true
+  tags: wg-portal:config

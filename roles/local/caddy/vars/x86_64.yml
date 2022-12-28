@@ -1,0 +1,3 @@
+---
+caddy_package_url: >-
+  https://github.com/caddyserver/caddy/releases/download/v{{ caddy_version }}/caddy_{{ caddy_version }}_linux_amd64.deb

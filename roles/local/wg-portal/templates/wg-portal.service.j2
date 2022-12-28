@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=WireGuard Portal
+ConditionPathExists={{ wg_portal_server_bin_path }}
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+
+Restart=on-failure
+RestartSec=10
+
+WorkingDirectory={{ wg_portal_working_dir }}
+ExecStart={{ wg_portal_server_bin_path }}
+EnvironmentFile={{ wg_portal_env_file }}
+
+[Install]
+WantedBy=multi-user.target

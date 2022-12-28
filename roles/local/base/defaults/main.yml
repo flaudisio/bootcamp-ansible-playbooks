@@ -2,6 +2,9 @@
 base_packages:
   - bzip2
   - cron
+  - iptables
   - rsync
+  - unzip
+  - zip
 
 base_prune_docker_images_path: /usr/local/bin/prune-docker-images
