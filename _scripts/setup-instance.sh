@@ -122,7 +122,7 @@ install_ansible()
 {
     _msg "--> Installing Ansible"
 
-    _run make -C "$TempPlaybooksDir" install-all VENV_DIR="$TempVenvDir"
+    _run_with_retry make -C "$TempPlaybooksDir" install-all VENV_DIR="$TempVenvDir"
 
     export PATH="${TempVenvDir}/bin:${PATH}"
 }
