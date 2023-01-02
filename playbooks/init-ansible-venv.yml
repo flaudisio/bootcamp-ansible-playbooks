@@ -33,13 +33,13 @@
 
   vars:
     ansible_python_interpreter: /usr/bin/env python3
-    management_venv_dir: /opt/ansible-venv
+    management_venv_dir: /opt/ansible-host
     requirements_file: /tmp/requirements.txt
 
   tasks:
     - name: Copy requirements file to host
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../requirements.txt"
+        src: "{{ playbook_dir }}/../_requirements/host.txt"
         dest: "{{ requirements_file }}"
         owner: root
         group: root
