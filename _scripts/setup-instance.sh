@@ -169,8 +169,6 @@ do_cleanup()
         _msg "--> Cleaning up"
 
         _run rm -rf "$TempPlaybooksDir"
-
-        DEBIAN_FRONTEND=noninteractive _run apt purge -q -y make
     fi
 
     _msg "Program finished at $( date --utc )"
