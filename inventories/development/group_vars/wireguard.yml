@@ -1,11 +1,24 @@
 ---
 # ------------------------------------------------------------------------------
+# firewall
+# ------------------------------------------------------------------------------
+
+firewall_allowed_tcp_ports:
+  - 22
+  - 80
+  - 443
+
+firewall_allowed_udp_ports:
+  - "{{ wireguard_port }}"
+
+firewall_additional_rules:
+  - iptables -t nat -A POSTROUTING -o {{ ansible_default_ipv4.interface }} -j MASQUERADE
+
+# ------------------------------------------------------------------------------
 # wireguard
 # ------------------------------------------------------------------------------
 
 wireguard_address: 10.8.0.1/24
-
-wireguard_configure_iptables: true
 
 # ------------------------------------------------------------------------------
 # wg-portal

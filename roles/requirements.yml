@@ -1,2 +1,5 @@
 ---
-roles: []
+roles:
+  - src: geerlingguy.firewall
+    version: 2.5.1
+    name: firewall
