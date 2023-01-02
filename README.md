@@ -58,7 +58,7 @@ curl -L "https://raw.githubusercontent.com/flaudisio/bootcamp-sre-ansible-playbo
 Para provisionar uma instância que não foi inicializada via user data, utilize os playbooks de inicialização. Exemplo:
 
 ```console
-$ export ANSIBLE_PRIVATE_KEY_FILE=~/.ssh/wireguard.pem
+$ export ANSIBLE_PRIVATE_KEY_FILE=/path/to/wireguard.pem
 $ export ENVIRONMENT="development"
 $ export INVENTORY="wireguard.ini"
 $ export PLAYBOOK="deploy-wireguard.yml"
