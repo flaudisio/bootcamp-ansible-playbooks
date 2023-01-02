@@ -10,22 +10,12 @@
         set -e &&
         if command -v apt ; then
           DEBIAN_FRONTEND=noninteractive apt update -q ;
-          DEBIAN_FRONTEND=noninteractive apt install -q -y python3 python3-venv ;
+          DEBIAN_FRONTEND=noninteractive apt install -q -y --no-install-recommends python3 python3-venv ;
         fi
       args:
         executable: /bin/bash
-
-    - name: Install Python 3 using raw module (dnf/yum)
-      ansible.builtin.raw: >
-        set -e &&
-        for cmd in dnf yum ; do
-          if command -v "$cmd" ; then
-            "$cmd" install -y python3 ;
-            break ;
-          fi
-        done
-      args:
-        executable: /bin/bash
+      register: python_install
+      changed_when: "'0 upgraded, 0 newly installed' not in python_install.stdout"
 
 - name: Bootstrap - Setup Ansible management virtualenv
   hosts: all
@@ -33,13 +23,13 @@
 
   vars:
     ansible_python_interpreter: /usr/bin/env python3
-    management_venv_dir: /opt/ansible-venv
+    management_venv_dir: /opt/ansible-host
     requirements_file: /tmp/requirements.txt
 
   tasks:
     - name: Copy requirements file to host
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../requirements.txt"
+        src: "{{ playbook_dir }}/../_requirements/host.txt"
         dest: "{{ requirements_file }}"
         owner: root
         group: root

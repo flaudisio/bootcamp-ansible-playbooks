@@ -16,6 +16,7 @@ lint:  ## Run lint commands
 	pre-commit run --all-files --verbose --show-diff-on-failure --color always
 
 .PHONY: install-ansible
+install-ansible: REQUIREMENTS ?= _requirements/control.txt
 install-ansible:  ## Install Ansible and dependencies in a virtualenv
 	@if [ -n '$(GITLAB_CI)' ] ; then \
 		echo "NOTE: GitLab CI environment detected, skipping virtualenv creation." ; \
@@ -26,7 +27,7 @@ install-ansible:  ## Install Ansible and dependencies in a virtualenv
 		) \
 	fi
 	@[ -d '$(VENV_DIR)' ] && echo "\nVirtualenv is ready on '$(VENV_DIR)' directory!\n" || true
-	pip install --upgrade pip -r requirements.txt
+	pip install --upgrade pip -r '$(REQUIREMENTS)'
 	@echo
 	@echo 'Done! Run "make install-galaxy-deps" to install Galaxy dependencies.'
 	@echo

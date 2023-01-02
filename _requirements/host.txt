@@ -1,0 +1,2 @@
+# Dependencies for Ansible managed nodes
+boto3>=1.26.32,<2.0

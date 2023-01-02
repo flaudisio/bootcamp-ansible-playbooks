@@ -13,8 +13,8 @@ readonly ProgramName="setup-instance"
 readonly ProgramVersion="0.1.0"
 
 readonly RepoUrl="https://github.com/flaudisio/bootcamp-sre-ansible-playbooks.git"
-readonly TempPlaybooksDir="/tmp/setup-instance-ansible-playbooks"
-readonly TempVenvDir="/tmp/setup-instance-ansible-venv"
+readonly TempPlaybooksDir="/tmp/ansible-playbooks"
+readonly AnsibleVenvDir="/opt/ansible-control"
 
 : "${REPO_BRANCH:="main"}"
 : "${LOG_FILE:="/var/log/user-data.log"}"
@@ -78,13 +78,28 @@ _run_with_retry()
     exit 1
 }
 
+_check_files_exist()
+{
+    local file
+    local error=0
+
+    for file in "$@" ; do
+        if [[ ! -f "$file" ]] ; then
+            _msg "Error: file '$file' not found"
+            error=1
+        fi
+    done
+
+    return $error
+}
+
 check_required_vars()
 {
     local -r required_vars=( ENVIRONMENT INVENTORY PLAYBOOK )
     local var_name
     local error=0
 
-    _msg "--> Checking environment variables"
+    _msg "--> Checking required environment variables"
 
     for var_name in "${required_vars[@]}" ; do
         if [[ -z "${!var_name+x}" ]] ; then
@@ -103,66 +118,44 @@ install_system_deps()
     _msg "--> Installing system dependencies"
 
     DEBIAN_FRONTEND=noninteractive _run apt update -q
-    DEBIAN_FRONTEND=noninteractive _run apt install -q -y --no-install-recommends git make python3 python3-venv
-}
-
-clone_playbooks_repo()
-{
-    _msg "--> Cloning playbooks repository"
-
-    if [[ -d "$TempPlaybooksDir" ]] ; then
-        _msg "Repository dir '$TempPlaybooksDir' already exists; skipping 'git clone'"
-        return 0
-    fi
-
-    _run git clone --branch "$REPO_BRANCH" --depth 1 "$RepoUrl" "$TempPlaybooksDir"
+    DEBIAN_FRONTEND=noninteractive _run apt install -q -y --no-install-recommends python3 python3-venv git make
 }
 
 install_ansible()
 {
+    _msg "--> Cloning playbooks repository to temp dir"
+
+    _run rm -rf "$TempPlaybooksDir"
+    _run git clone --branch "$REPO_BRANCH" --depth 1 "$RepoUrl" "$TempPlaybooksDir"
+
     _msg "--> Installing Ansible"
 
-    _run_with_retry make -C "$TempPlaybooksDir" install-all VENV_DIR="$TempVenvDir"
+    _run_with_retry make -C "$TempPlaybooksDir" install-all VENV_DIR="$AnsibleVenvDir"
 
-    export PATH="${TempVenvDir}/bin:${PATH}"
+    export PATH="${AnsibleVenvDir}/bin:${PATH}"
 }
 
-_assert_files_exist()
-{
-    local file
-    local error=0
-
-    _msg "--> Checking if files exist"
-
-    for file in "$@" ; do
-        if [[ ! -f "$file" ]] ; then
-            _msg "Error: file '$file' not found"
-            error=1
-        fi
-    done
-
-    return $error
-}
-
-bootstrap_machine_with_ansible()
+run_ansible_playbooks()
 {
     local -r inventory_file="inventories/${ENVIRONMENT}/${INVENTORY}"
     local -r playbook_file="playbooks/${PLAYBOOK}"
-    local ansible_opts=( --connection "local" --inventory "$inventory_file" )
+    local -r ansible_opts=( --connection "local" --inventory "$inventory_file" )
 
     _run pushd "$TempPlaybooksDir"
 
-    _assert_files_exist "$inventory_file" "$playbook_file" || exit 1
+    _msg "--> Checking if inventory and playbook files exist"
 
-    _msg "--> Running Ansible tasks"
+    _check_files_exist "$inventory_file" "$playbook_file" || exit 1
 
     # Output Ansible version to help on troubleshooting
     _run ansible --version
 
-    # Run bootstrap tasks
+    _msg "--> Running initialization tasks"
+
     _run_with_retry ansible-playbook playbooks/init-ansible-venv.yml --verbose "${ansible_opts[@]}"
 
-    # Run the node role tasks
+    _msg "--> Running node role tasks"
+
     _run_with_retry ansible-playbook "$playbook_file" "${ansible_opts[@]}"
 
     _run popd
@@ -175,9 +168,7 @@ do_cleanup()
     else
         _msg "--> Cleaning up"
 
-        _run rm -rf "$TempPlaybooksDir" "$TempVenvDir"
-
-        DEBIAN_FRONTEND=noninteractive _run apt purge -q -y make
+        _run rm -rf "$TempPlaybooksDir"
     fi
 
     _msg "Program finished at $( date --utc )"
@@ -191,9 +182,8 @@ main()
 
     check_required_vars
     install_system_deps
-    clone_playbooks_repo
     install_ansible
-    bootstrap_machine_with_ansible
+    run_ansible_playbooks
 
     _msg "Success!"
 }
