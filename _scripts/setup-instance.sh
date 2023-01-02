@@ -118,7 +118,7 @@ install_system_deps()
     _msg "--> Installing system dependencies"
 
     DEBIAN_FRONTEND=noninteractive _run apt update -q
-    DEBIAN_FRONTEND=noninteractive _run apt install -q -y --no-install-recommends git make python3 python3-venv
+    DEBIAN_FRONTEND=noninteractive _run apt install -q -y --no-install-recommends python3 python3-venv git make
 }
 
 install_ansible()

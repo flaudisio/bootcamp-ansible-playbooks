@@ -10,10 +10,12 @@
         set -e &&
         if command -v apt ; then
           DEBIAN_FRONTEND=noninteractive apt update -q ;
-          DEBIAN_FRONTEND=noninteractive apt install -q -y python3 python3-venv ;
+          DEBIAN_FRONTEND=noninteractive apt install -q -y --no-install-recommends python3 python3-venv ;
         fi
       args:
         executable: /bin/bash
+      register: python_install
+      changed_when: "'0 upgraded, 0 newly installed' not in python_install.stdout"
 
     - name: Install Python 3 using raw module (dnf/yum)
       ansible.builtin.raw: >
