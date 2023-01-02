@@ -17,18 +17,6 @@
       register: python_install
       changed_when: "'0 upgraded, 0 newly installed' not in python_install.stdout"
 
-    - name: Install Python 3 using raw module (dnf/yum)
-      ansible.builtin.raw: >
-        set -e &&
-        for cmd in dnf yum ; do
-          if command -v "$cmd" ; then
-            "$cmd" install -y python3 ;
-            break ;
-          fi
-        done
-      args:
-        executable: /bin/bash
-
 - name: Bootstrap - Setup Ansible management virtualenv
   hosts: all
   tags: bootstrap:venv
