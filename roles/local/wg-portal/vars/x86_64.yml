@@ -1,0 +1,2 @@
+---
+wg_portal_server_dl_url: https://github.com/h44z/wg-portal/releases/download/v{{ wg_portal_version }}/wg-portal-amd64

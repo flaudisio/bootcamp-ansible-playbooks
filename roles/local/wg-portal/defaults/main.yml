@@ -1,7 +1,6 @@
 ---
 wg_portal_version: 1.0.16
 
-wg_portal_server_dl_url: https://github.com/h44z/wg-portal/releases/download/v{{ wg_portal_version }}/wg-portal-arm64
 wg_portal_server_bin_path: /usr/local/bin/wg-portal
 
 wg_portal_working_dir: /var/opt/wg-portal

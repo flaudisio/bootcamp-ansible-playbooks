@@ -1,4 +1,9 @@
 ---
+- name: Include architecture-specific variables
+  ansible.builtin.include_vars:
+    file: "{{ ansible_architecture }}.yml"
+  tags: wg-portal:install
+
 - name: Install server binary
   ansible.builtin.get_url:
     url: "{{ wg_portal_server_dl_url }}"
