@@ -16,7 +16,7 @@ lint:  ## Run lint commands
 	pre-commit run --all-files --verbose --show-diff-on-failure --color always
 
 .PHONY: install-ansible
-install-ansible: REQUIREMENTS ?= _requirements/control.txt
+install-ansible: REQUIREMENTS ?= _requirements/control-nodes.txt
 install-ansible:  ## Install Ansible and dependencies in a virtualenv
 	@if [ -n '$(GITLAB_CI)' ] ; then \
 		echo "NOTE: GitLab CI environment detected, skipping virtualenv creation." ; \
