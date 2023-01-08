@@ -28,10 +28,17 @@ wg_portal_admin_username_ssm_parameter: /wireguard/wg-portal-admin-username
 wg_portal_admin_password_ssm_parameter: /wireguard/wg-portal-admin-password
 
 # Mail Settings
-wg_portal_mail_from: ""
-wg_portal_email_host: ""
-wg_portal_email_port: ""
-wg_portal_email_encryption: ""
-wg_portal_email_cert_validation: ""
-wg_portal_email_username: ""
-wg_portal_email_password: ""
+wg_portal_email_enabled: false
+wg_portal_email_from: WireGuard Portal <vpn@example.com>
+wg_portal_email_host: smtp.example.com
+wg_portal_email_port: 587
+wg_portal_email_encryption: starttls
+wg_portal_email_cert_validation: true
+
+wg_portal_email_username: smtpuser
+wg_portal_email_password: ChangeMe!123
+
+wg_portal_email_credentials_ssm_enabled: false
+wg_portal_email_credentials_ssm_region: us-east-1
+wg_portal_email_username_ssm_parameter: /wireguard/wg-portal-email-username
+wg_portal_email_password_ssm_parameter: /wireguard/wg-portal-email-password
