@@ -12,9 +12,9 @@ set -o pipefail
 readonly ProgramName="setup-instance"
 readonly ProgramVersion="0.1.0"
 
-readonly RepoUrl="https://github.com/flaudisio/bootcamp-sre-ansible-playbooks.git"
-readonly TempPlaybooksDir="/tmp/ansible-playbooks"
-readonly AnsibleVenvDir="/opt/ansible-control"
+readonly PlaybooksRepoUrl="https://github.com/flaudisio/bootcamp-sre-ansible-playbooks.git"
+readonly PlaybooksRepoDir="/tmp/ansible-playbooks-repo"
+readonly PlaybooksVenvDir="/tmp/ansible-playbooks-venv"
 
 : "${REPO_BRANCH:="main"}"
 : "${LOG_FILE:="/var/log/user-data.log"}"
@@ -58,8 +58,8 @@ _run()
 
 _run_with_retry()
 {
+    local -r max_retries=2
     local retry_count=0
-    local max_retries=2
 
     # Retry up to $max_retries times to be more resilient in case of intermittent errors (e.g. network timeouts)
     while [[ $retry_count -le $max_retries ]] ; do
@@ -125,14 +125,14 @@ install_ansible()
 {
     _msg "--> Cloning playbooks repository to temp dir"
 
-    _run rm -rf "$TempPlaybooksDir"
-    _run git clone --branch "$REPO_BRANCH" --depth 1 "$RepoUrl" "$TempPlaybooksDir"
+    _run rm -rf "$PlaybooksRepoDir"
+    _run git clone --branch "$REPO_BRANCH" --depth 1 "$PlaybooksRepoUrl" "$PlaybooksRepoDir"
 
     _msg "--> Installing Ansible"
 
-    _run_with_retry make -C "$TempPlaybooksDir" install-all VENV_DIR="$AnsibleVenvDir"
+    _run_with_retry make -C "$PlaybooksRepoDir" install-all VENV_DIR="$PlaybooksVenvDir"
 
-    export PATH="${AnsibleVenvDir}/bin:${PATH}"
+    _run export PATH="${PlaybooksVenvDir}/bin:${PATH}"
 }
 
 run_ansible_playbooks()
@@ -141,7 +141,7 @@ run_ansible_playbooks()
     local -r playbook_file="playbooks/${PLAYBOOK}"
     local -r ansible_opts=( --connection "local" --inventory "$inventory_file" )
 
-    _run pushd "$TempPlaybooksDir"
+    _run pushd "$PlaybooksRepoDir"
 
     _msg "--> Checking if inventory and playbook files exist"
 
@@ -150,15 +150,17 @@ run_ansible_playbooks()
     # Output Ansible version to help on troubleshooting
     _run ansible --version
 
-    _msg "--> Running initialization tasks"
+    _msg "--> Running initialization playbooks"
 
     _run_with_retry ansible-playbook playbooks/init-ansible-venv.yml --verbose "${ansible_opts[@]}"
 
-    _msg "--> Running node role tasks"
+    _msg "--> Running node playbooks"
 
     _run_with_retry ansible-playbook "$playbook_file" "${ansible_opts[@]}"
 
     _run popd
+
+    _msg "--> Ansible playbooks successfully run!"
 }
 
 do_cleanup()
@@ -168,7 +170,7 @@ do_cleanup()
     else
         _msg "--> Cleaning up"
 
-        _run rm -rf "$TempPlaybooksDir"
+        _run rm -rf "$PlaybooksRepoDir" "$PlaybooksVenvDir"
     fi
 
     _msg "Program finished at $( date --utc )"
@@ -184,8 +186,6 @@ main()
     install_system_deps
     install_ansible
     run_ansible_playbooks
-
-    _msg "Success!"
 }
 
 
