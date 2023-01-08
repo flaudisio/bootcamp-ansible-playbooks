@@ -28,10 +28,11 @@ wg_portal_listening_address: 127.0.0.1:8123
 wg_portal_external_url: https://vpn.dev.bootcamp.flaudisio.com
 wg_portal_website_title: Bootcamp VPN
 wg_portal_company_name: Bootcamp
-wg_portal_admin_user: flaudisio+bootcamp@gmail.com
-wg_portal_admin_pass_ssm_parameter_enabled: true
-wg_portal_admin_pass_ssm_parameter_name: /wireguard/wg-portal-admin-password
-wg_portal_admin_pass_ssm_parameter_region: us-east-1
+
+wg_portal_admin_credentials_ssm_enabled: true
+wg_portal_admin_credentials_ssm_region: us-east-1
+wg_portal_admin_username_ssm_parameter: /wireguard/wg-portal-admin-username
+wg_portal_admin_password_ssm_parameter: /wireguard/wg-portal-admin-password
 
 # ------------------------------------------------------------------------------
 # caddy
