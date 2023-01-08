@@ -7,6 +7,13 @@ Roles e playbooks do Ansible utilizados para provisionar as instâncias do desaf
 
 ## Como utilizar
 
+1. Clone o repositório:
+
+    ```console
+    $ git clone https://github.com/flaudisio/bootcamp-sre-ansible-playbooks.git
+    $ cd bootcamp-sre-ansible-playbooks/
+    ```
+
 1. Instale o Ansible e dependências do Galaxy:
 
     ```console
@@ -37,7 +44,7 @@ Para remover o virtualenv do Ansible e quaisquer collections/roles baixadas, exe
 $ make uninstall
 ```
 
-## Provisionando novas instâncias EC2
+## Provisionando novos servidores
 
 ### Via user data
 
@@ -50,19 +57,17 @@ export ENVIRONMENT="development"
 export INVENTORY="wireguard.ini"
 export PLAYBOOK="deploy-wireguard.yml"
 
-curl -L "https://raw.githubusercontent.com/flaudisio/bootcamp-sre-ansible-playbooks/main/_scripts/setup-instance.sh" | bash
+curl -m 5 --retry 2 -fL "https://raw.githubusercontent.com/flaudisio/bootcamp-sre-ansible-playbooks/main/_scripts/setup-instance.sh" | bash
 ```
 
-### Via Ansible
+### Via Ansible (máquina local)
 
-Para provisionar uma instância que não foi inicializada via user data, utilize os playbooks de inicialização. Exemplo:
+Para provisionar uma instância que não foi inicializada via user data, utilize o playbook de inicialização seguido pelo
+playbook relativo à instância.
+
+Exemplo:
 
 ```console
-$ export ANSIBLE_PRIVATE_KEY_FILE=/path/to/wireguard.pem
-$ export ENVIRONMENT="development"
-$ export INVENTORY="wireguard.ini"
-$ export PLAYBOOK="deploy-wireguard.yml"
-
 $ ansible-playbook -i inventories/development/wireguard.ini playbooks/init-ansible-venv.yml
-$ ansible-playbook -i inventories/development/wireguard.ini playbooks/init-instance.yml
+$ ansible-playbook -i inventories/development/wireguard.ini playbooks/deploy-wireguard.yml
 ```
