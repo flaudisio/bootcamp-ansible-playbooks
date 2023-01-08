@@ -5,39 +5,50 @@
   tags: bootstrap:python
 
   tasks:
-    - name: Install Python 3 using raw module (apt)
-      ansible.builtin.raw: >
-        set -e &&
-        if command -v apt ; then
-          DEBIAN_FRONTEND=noninteractive apt update -q ;
-          DEBIAN_FRONTEND=noninteractive apt install -q -y --no-install-recommends python3 python3-venv ;
-        fi
+    - name: Install Python 3 using raw module
+      ansible.builtin.raw: apt update -q && apt install -q -y --no-install-recommends python3
       args:
         executable: /bin/bash
       register: python_install
       changed_when: "'0 upgraded, 0 newly installed' not in python_install.stdout"
 
-- name: Bootstrap - Setup Ansible management virtualenv
+- name: Bootstrap - Setup Ansible virtualenvs
   hosts: all
   tags: bootstrap:venv
 
   vars:
     ansible_python_interpreter: /usr/bin/env python3
+    control_venv_dir: /opt/ansible-control
     management_venv_dir: /opt/ansible-host
-    requirements_file: /tmp/requirements.txt
 
   tasks:
-    - name: Copy requirements file to host
+    - name: Install required packages
+      ansible.builtin.apt:
+        name: python3-venv
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Copy requirements files to host
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../_requirements/host.txt"
-        dest: "{{ requirements_file }}"
-        owner: root
-        group: root
-        mode: 0644
+        src: "{{ playbook_dir }}/../_requirements/{{ item }}"
+        dest: "/tmp/{{ item }}"
+      loop:
+        - control-nodes.txt
+        - managed-nodes.txt
+
+    - name: Install dependencies to the control virtualenv
+      ansible.builtin.pip:
+        requirements: /tmp/control-nodes.txt
+        virtualenv: "{{ control_venv_dir }}"
+        virtualenv_command: python3 -m venv --upgrade "{{ control_venv_dir }}"
+      register: pip_output
+      changed_when: >
+        (pip_output.stdout_lines | select("match", "^Requirement already satisfied") | length) != (pip_output.stdout_lines | length)
 
     - name: Install dependencies to the management virtualenv
       ansible.builtin.pip:
-        requirements: "{{ requirements_file }}"
+        requirements: /tmp/managed-nodes.txt
         virtualenv: "{{ management_venv_dir }}"
         virtualenv_command: python3 -m venv --upgrade "{{ management_venv_dir }}"
       register: pip_output
