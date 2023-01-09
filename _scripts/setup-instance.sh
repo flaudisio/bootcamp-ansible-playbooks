@@ -12,7 +12,7 @@ set -o pipefail
 readonly ProgramName="setup-instance"
 readonly ProgramVersion="0.1.0"
 
-readonly PlaybooksRepoUrl="https://github.com/flaudisio/bootcamp-sre-ansible-playbooks.git"
+readonly PlaybooksRepoUrl="https://github.com/flaudisio/bootcamp-ansible-playbooks.git"
 readonly PlaybooksRepoDir="/tmp/ansible-playbooks-repo"
 readonly PlaybooksVenvDir="/tmp/ansible-playbooks-venv"
 

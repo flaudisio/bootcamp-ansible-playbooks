@@ -10,8 +10,8 @@ Roles e playbooks do Ansible utilizados para provisionar as instâncias do desaf
 1. Clone o repositório:
 
     ```console
-    $ git clone https://github.com/flaudisio/bootcamp-sre-ansible-playbooks.git
-    $ cd bootcamp-sre-ansible-playbooks/
+    $ git clone https://github.com/flaudisio/bootcamp-ansible-playbooks.git
+    $ cd bootcamp-ansible-playbooks/
     ```
 
 1. Instale o Ansible e dependências do Galaxy:
@@ -57,7 +57,7 @@ export ENVIRONMENT="development"
 export INVENTORY="wireguard.ini"
 export PLAYBOOK="deploy-wireguard.yml"
 
-curl -m 5 --retry 2 -fL "https://raw.githubusercontent.com/flaudisio/bootcamp-sre-ansible-playbooks/main/_scripts/setup-instance.sh" | bash
+curl -m 5 --retry 2 -fL "https://raw.githubusercontent.com/flaudisio/bootcamp-ansible-playbooks/main/_scripts/setup-instance.sh" | bash
 ```
 
 ### Via Ansible (máquina local)

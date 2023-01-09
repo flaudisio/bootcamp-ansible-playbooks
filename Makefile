@@ -1,7 +1,7 @@
 COLLECTIONS_PATH := collections
 ROLES_PATH := roles/public
 
-VENV_DIR ?= $(HOME)/.virtualenvs/bootcamp-sre-ansible-playbooks
+VENV_DIR ?= $(HOME)/.virtualenvs/bootcamp-ansible-playbooks
 
 export PATH := $(VENV_DIR)/bin:$(PATH)
 
