@@ -1,5 +1,5 @@
 ---
-- name: Deploy WordPress site - wp-01
+- name: Deploy WordPress site
   hosts: all
 
   roles:
