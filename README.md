@@ -68,5 +68,5 @@ Exemplo:
 
 ```console
 $ ansible-playbook -i inventories/development/wireguard.aws_ec2.yml playbooks/init-ansible-venv.yml
-$ ansible-playbook -i inventories/development/wireguard.aws_ec2.yml playbooks/svc-wireguard.yml
+$ ansible-playbook -i inventories/development/wireguard.aws_ec2.yml playbooks/role-wireguard.yml
 ```

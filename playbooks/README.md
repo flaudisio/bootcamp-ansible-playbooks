@@ -12,7 +12,7 @@ Playbook filenames **must** use one of the predefined prefixes below.
 | `adhoc-*` | One-off playbooks that can be used on the CLI or in Semaphore. These are typically for basic tasks. |
 | `maint-*` | Playbooks for maintainance tasks (e.g. system updates). |
 | `debug-*` | Playbooks for debugging tasks (e.g. variable dumping). |
-| `svc-*` | Playbooks for provisioning services. |
+| `role-*` | Playbooks for provisioning full services and/or stacks. |
 
 ## Related links
 
