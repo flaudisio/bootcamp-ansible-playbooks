@@ -16,6 +16,7 @@ readonly PlaybooksRepoUrl="https://github.com/flaudisio/bootcamp-ansible-playboo
 readonly PlaybooksRepoDir="/tmp/ansible-playbooks-repo"
 readonly PlaybooksVenvDir="/tmp/ansible-playbooks-venv"
 
+# Initialize environment variables
 : "${REPO_BRANCH:="main"}"
 : "${LOG_FILE:="/var/log/setup-instance.log"}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
@@ -111,6 +112,9 @@ check_required_vars()
 
     [[ $error -ne 0 ]] && exit 2
 
+    # Use service name for the role when it's not defined
+    [[ -z "$ROLE" ]] && ROLE="$SERVICE"
+
     return 0
 }
 
@@ -139,9 +143,9 @@ install_ansible()
 run_ansible_playbooks()
 {
     local -r inventory_file="inventories/${ENVIRONMENT}/${SERVICE}.aws_ec2.yml"
-    local -r playbook_file="playbooks/role-${SERVICE}.yml"
-    local -r private_ip="$( curl -sS http://169.254.169.254/latest/meta-data/local-ipv4 )"
-    local -r ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$private_ip" )
+    local -r playbook_file="playbooks/role-${ROLE}.yml"
+    local -r instance_ip="$( curl -sS http://169.254.169.254/latest/meta-data/local-ipv4 )"
+    local -r ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$instance_ip" )
 
     _run pushd "$PlaybooksRepoDir"
 
