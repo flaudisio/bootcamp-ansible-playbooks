@@ -96,7 +96,7 @@ _check_files_exist()
 
 check_required_vars()
 {
-    local -r required_vars=( ENVIRONMENT INVENTORY PLAYBOOK )
+    local -r required_vars=( ENVIRONMENT SERVICE )
     local var_name
     local error=0
 
@@ -138,9 +138,10 @@ install_ansible()
 
 run_ansible_playbooks()
 {
-    local -r inventory_file="inventories/${ENVIRONMENT}/${INVENTORY}"
-    local -r playbook_file="playbooks/${PLAYBOOK}"
-    local -r ansible_opts=( --connection "local" --inventory "$inventory_file" )
+    local -r inventory_file="inventories/${ENVIRONMENT}/${SERVICE}.aws_ec2.yml"
+    local -r playbook_file="playbooks/svc-${SERVICE}.yml"
+    local -r private_ip="$( curl -sS http://169.254.169.254/latest/meta-data/local-ipv4 )"
+    local -r ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$private_ip" )
 
     _run pushd "$PlaybooksRepoDir"
 
