@@ -1,0 +1,27 @@
+---
+- name: Deploy WordPress site - wp-01
+  hosts: all
+
+  roles:
+    - role: base
+      tags: [base]
+    - role: docker
+      tags: [docker]
+
+  tasks:
+    - name: Deploy Compose configuration
+      community.docker.docker_compose:
+        project_name: whoami
+        definition:
+          version: "2.4"
+          services:
+            whoami:
+              image: traefik/whoami
+              restart: unless-stopped
+              container_name: whoami
+              hostname: "{{ instance_id | default('whoami-default') }}"
+              ports:
+                - "80:80"
+              environment:
+                WHOAMI_NAME: "{{ whoami_name | default('whoami-default') }}"
+        state: present
