@@ -1,0 +1,13 @@
+---
+- name: Deploy Semaphore server
+  hosts: all
+
+  roles:
+    - role: base
+      tags: [base]
+    - role: docker
+      tags: [docker]
+    - role: semaphore
+      tags: [semaphore]
+    - role: caddy
+      tags: [caddy]
