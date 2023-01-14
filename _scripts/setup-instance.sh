@@ -17,14 +17,15 @@ readonly PlaybooksRepoDir="/tmp/ansible-playbooks-repo"
 readonly PlaybooksVenvDir="/tmp/ansible-playbooks-venv"
 
 : "${REPO_BRANCH:="main"}"
-: "${LOG_FILE:="/var/log/user-data.log"}"
+: "${LOG_FILE:="/var/log/setup-instance.log"}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
 : "${DISABLE_CLEANUP:=""}"
 
-# Start logging to file as soon as possible
+# Start logging as soon as possible
 if [[ -z "$DISABLE_OUTPUT_REDIRECT" ]] ; then
-    # Ref: https://stackoverflow.com/a/314678/5463829
-    exec > >( tee -a "$LOG_FILE" ) 2>&1
+    # Send the log output from this script to log file, syslog, and the console
+    # Ref: https://alestic.com/2010/12/ec2-user-data-output/
+    exec > >( tee -a "$LOG_FILE" | logger -t "$ProgramName" -s 2> /dev/console) 2>&1
     echo "Notice: redirecting all script output to $LOG_FILE" >&2
 fi
 
