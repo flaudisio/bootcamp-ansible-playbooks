@@ -1,0 +1,81 @@
+#jinja2:lstrip_blocks: True
+# {{ ansible_managed }}
+
+version: "2.4"
+
+x-credentials:
+  {% if semaphore_credentials_ssm_enabled | bool %}
+  - &db_name {{ lookup('amazon.aws.aws_ssm', semaphore_postgres_db_name, region=semaphore_credentials_ssm_region) }}
+  - &db_user {{ lookup('amazon.aws.aws_ssm', semaphore_postgres_db_user, region=semaphore_credentials_ssm_region) }}
+  - &db_pass {{ lookup('amazon.aws.aws_ssm', semaphore_postgres_db_pass, region=semaphore_credentials_ssm_region) }}
+  - &access_key_encryption {{ lookup('amazon.aws.aws_ssm', semaphore_access_key_encryption, region=semaphore_credentials_ssm_region) }}
+  - &admin_user {{ lookup('amazon.aws.aws_ssm', semaphore_admin_username, region=semaphore_credentials_ssm_region) }}
+  - &admin_pass {{ lookup('amazon.aws.aws_ssm', semaphore_admin_password, region=semaphore_credentials_ssm_region) }}
+  {% else %}
+  - &db_name {{ semaphore_postgres_db_name }}
+  - &db_user {{ semaphore_postgres_db_user }}
+  - &db_pass {{ semaphore_postgres_db_pass }}
+  - &access_key_encryption {{ semaphore_access_key_encryption }}
+  - &admin_user {{ semaphore_admin_username }}
+  - &admin_pass {{ semaphore_admin_password }}
+  {% endif %}
+
+services:
+  postgres:
+    image: {{ semaphore_postgres_image }}
+    restart: unless-stopped
+    container_name: semaphore-postgres
+    hostname: postgres
+    volumes:
+      - {{ semaphore_volume_base_dir }}/postgres-data:/var/lib/postgresql/data
+    environment:
+     POSTGRES_DATABASE: *db_name
+     POSTGRES_USER: *db_user
+     POSTGRES_PASSWORD: *db_pass
+
+  semaphore:
+    image: {{ semaphore_server_image_repo }}:{{ semaphore_server_image_tag }}
+    restart: unless-stopped
+    container_name: semaphore-app
+    ports:
+      - 127.0.0.1:{{ semaphore_port }}:3000
+    volumes:
+      - {{ semaphore_volume_base_dir }}/semaphore-etc:/etc/semaphore
+      - {{ semaphore_volume_base_dir }}/semaphore-tmp:/tmp/semaphore
+    environment:
+      SEMAPHORE_DB_DIALECT: postgres
+      SEMAPHORE_DB_HOST: postgres
+      SEMAPHORE_DB_PORT: 5432
+      SEMAPHORE_DB: *db_name
+      SEMAPHORE_DB_USER: *db_user
+      SEMAPHORE_DB_PASS: *db_pass
+      SEMAPHORE_ACCESS_KEY_ENCRYPTION: *access_key_encryption
+      SEMAPHORE_ADMIN: *admin_user
+      SEMAPHORE_ADMIN_PASSWORD: *admin_pass
+      SEMAPHORE_ADMIN_NAME: {{ semaphore_admin_name }}
+      SEMAPHORE_ADMIN_EMAIL: {{ semaphore_admin_email }}
+      SEMAPHORE_TMP_PATH: /tmp/semaphore
+      SEMAPHORE_WEB_ROOT: {{ semaphore_web_root }}
+    depends_on:
+      - postgres
+
+  pgbackups:
+    image: {{ semaphore_pgbackups_image }}
+    restart: unless-stopped
+    container_name: semaphore-pgbackups
+    user: postgres:postgres
+    volumes:
+      - {{ semaphore_pgbackups_data_dir }}:/backups
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: *db_name
+      POSTGRES_USER: *db_user
+      POSTGRES_PASSWORD: *db_pass
+      POSTGRES_EXTRA_OPTS: -Z6 --schema=public --blobs
+      SCHEDULE: "{{ semaphore_pgbackups_schedule }}"
+      BACKUP_KEEP_DAYS: "{{ semaphore_pgbackups_keep_days }}"
+      BACKUP_KEEP_WEEKS: "{{ semaphore_pgbackups_keep_weeks }}"
+      BACKUP_KEEP_MONTHS: "{{ semaphore_pgbackups_keep_months }}"
+      HEALTHCHECK_PORT: "8080"
+    depends_on:
+      - postgres

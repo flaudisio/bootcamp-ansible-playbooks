@@ -54,8 +54,7 @@ Utilize o script `setup-instance.sh` no user data da instância. Exemplo:
 #!/bin/bash
 
 export ENVIRONMENT="development"
-export INVENTORY="wireguard.ini"
-export PLAYBOOK="deploy-wireguard.yml"
+export SERVICE="wireguard"
 
 curl -m 5 --retry 2 -fL "https://raw.githubusercontent.com/flaudisio/bootcamp-ansible-playbooks/main/_scripts/setup-instance.sh" | bash
 ```
@@ -68,6 +67,6 @@ playbook relativo à instância.
 Exemplo:
 
 ```console
-$ ansible-playbook -i inventories/development/wireguard.ini playbooks/init-ansible-venv.yml
-$ ansible-playbook -i inventories/development/wireguard.ini playbooks/deploy-wireguard.yml
+$ ansible-playbook -i inventories/development/wireguard.aws_ec2.yml playbooks/init-ansible-venv.yml
+$ ansible-playbook -i inventories/development/wireguard.aws_ec2.yml playbooks/role-wireguard.yml
 ```

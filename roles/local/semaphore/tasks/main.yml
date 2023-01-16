@@ -1,0 +1,43 @@
+---
+- name: Ensure installation directory exists
+  ansible.builtin.file:
+    path: "{{ semaphore_install_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  tags: semaphore:install
+
+- name: Ensure base data directory exists
+  ansible.builtin.file:
+    path: "{{ semaphore_volume_base_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  tags: semaphore:install
+
+- name: Ensure pgbackups data directory exists
+  ansible.builtin.file:
+    path: "{{ semaphore_pgbackups_data_dir }}"
+    state: directory
+    owner: "{{ semaphore_pgbackups_uid }}"
+    group: "{{ semaphore_pgbackups_uid }}"
+    mode: 0700
+  tags: semaphore:install
+
+- name: Create the Docker Compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ semaphore_install_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: 0600
+  tags: semaphore:config
+
+- name: Ensure container is running
+  community.docker.docker_compose:
+    project_name: semaphore
+    project_src: "{{ semaphore_install_dir }}"
+    state: present
+  tags: semaphore:service

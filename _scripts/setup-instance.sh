@@ -16,15 +16,17 @@ readonly PlaybooksRepoUrl="https://github.com/flaudisio/bootcamp-ansible-playboo
 readonly PlaybooksRepoDir="/tmp/ansible-playbooks-repo"
 readonly PlaybooksVenvDir="/tmp/ansible-playbooks-venv"
 
+# Initialize environment variables
 : "${REPO_BRANCH:="main"}"
-: "${LOG_FILE:="/var/log/user-data.log"}"
+: "${LOG_FILE:="/var/log/setup-instance.log"}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
 : "${DISABLE_CLEANUP:=""}"
 
-# Start logging to file as soon as possible
+# Start logging as soon as possible
 if [[ -z "$DISABLE_OUTPUT_REDIRECT" ]] ; then
-    # Ref: https://stackoverflow.com/a/314678/5463829
-    exec > >( tee -a "$LOG_FILE" ) 2>&1
+    # Send the log output from this script to log file, syslog, and the console
+    # Ref: https://alestic.com/2010/12/ec2-user-data-output/
+    exec > >( tee -a "$LOG_FILE" | logger -t "$ProgramName" -s 2> /dev/console) 2>&1
     echo "Notice: redirecting all script output to $LOG_FILE" >&2
 fi
 
@@ -95,7 +97,7 @@ _check_files_exist()
 
 check_required_vars()
 {
-    local -r required_vars=( ENVIRONMENT INVENTORY PLAYBOOK )
+    local -r required_vars=( ENVIRONMENT SERVICE )
     local var_name
     local error=0
 
@@ -109,6 +111,9 @@ check_required_vars()
     done
 
     [[ $error -ne 0 ]] && exit 2
+
+    # Use service name for the role when it's not defined
+    [[ -z "$ROLE" ]] && ROLE="$SERVICE"
 
     return 0
 }
@@ -137,9 +142,10 @@ install_ansible()
 
 run_ansible_playbooks()
 {
-    local -r inventory_file="inventories/${ENVIRONMENT}/${INVENTORY}"
-    local -r playbook_file="playbooks/${PLAYBOOK}"
-    local -r ansible_opts=( --connection "local" --inventory "$inventory_file" )
+    local -r inventory_file="inventories/${ENVIRONMENT}/${SERVICE}.aws_ec2.yml"
+    local -r playbook_file="playbooks/role-${ROLE}.yml"
+    local -r instance_ip="$( curl -sS http://169.254.169.254/latest/meta-data/local-ipv4 )"
+    local -r ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$instance_ip" )
 
     _run pushd "$PlaybooksRepoDir"
 

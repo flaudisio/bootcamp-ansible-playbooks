@@ -8,11 +8,11 @@ Playbook filenames **must** use one of the predefined prefixes below.
 
 | Prefix | Description |
 |--------|-------------|
-| `init-*` | Playbooks that make the node ready to run other playbooks (e.g. by installing the Ansible virtualenv and local repository clone). |
+| `init-*` | Playbooks that make a node ready to run other playbooks (e.g. by installing the Ansible virtualenv and local repository clone). |
 | `adhoc-*` | One-off playbooks that can be used on the CLI or in Semaphore. These are typically for basic tasks. |
-| `debug-*` | Playbooks that run debugging tasks. |
-| `deploy-*` | Playbooks that provision entire stacks and/or servers. |
-| `maint-*` | Playbooks dedicated to maintainance tasks (e.g. system update, etc). |
+| `maint-*` | Playbooks for maintainance tasks (e.g. system updates). |
+| `debug-*` | Playbooks for debugging tasks (e.g. variable dumping). |
+| `role-*` | Playbooks for provisioning full services and/or stacks. |
 
 ## Related links
 
