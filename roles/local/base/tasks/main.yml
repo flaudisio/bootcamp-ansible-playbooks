@@ -7,6 +7,6 @@
     cache_valid_time: 3600
   tags: base:packages
 
-- name: Include Ansible local tasks
+- name: Include prune-docker-images tasks
   import_tasks: prune-docker-images.yml
   tags: base:prune-docker-images
