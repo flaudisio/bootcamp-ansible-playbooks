@@ -1,2 +1,17 @@
 ---
-whoami_name: wp-01-whoami
+wordpress_credentials_ssm_enabled: true
+wordpress_credentials_ssm_region: us-east-1
+
+wordpress_db_host: wp-01-db.dev.bootcamp.flaudisio.com
+wordpress_db_name: /wordpress/wp-01/db-name
+wordpress_db_user: /wordpress/wp-01/db-user
+wordpress_db_pass: /wordpress/wp-01/db-pass
+
+wordpress_memcached_enabled: true
+wordpress_memcached_endpoint: wp-01-memcached.dev.bootcamp.flaudisio.com:11211
+
+wordpress_efs_enabled: true
+wordpress_efs_endpoint: wp-01-efs.dev.bootcamp.flaudisio.com
+
+wordpress_site_url: https://wp-01.dev.bootcamp.flaudisio.com
+wordpress_force_ssl_admin: true
