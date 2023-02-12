@@ -137,7 +137,9 @@ install_ansible()
 
     _run_with_retry make -C "$PlaybooksRepoDir" install-all VENV_DIR="$PlaybooksVenvDir"
 
-    _run export PATH="${PlaybooksVenvDir}/bin:${PATH}"
+    # NOTE: the temp venv dir must be added to the *end* of PATH so the Python binaries
+    # in the control and managed virtualenvs are NOT symlinked to the temp venv binary
+    _run export PATH="${PATH}:${PlaybooksVenvDir}/bin"
 }
 
 run_ansible_playbooks()
