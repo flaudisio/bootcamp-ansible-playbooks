@@ -1,0 +1,20 @@
+#jinja2:lstrip_blocks: True
+# {{ ansible_managed }}
+
+{
+    auto_https off
+}
+
+:{{ wordpress_app_port }} {
+    root * /var/www/html
+
+    php_fastcgi wordpress:9000 {
+        {% if "https://" in wordpress_site_url %}
+        header_up X-Forwarded-Proto "https"
+        {% endif %}
+    }
+
+    file_server
+
+    metrics /metrics
+}

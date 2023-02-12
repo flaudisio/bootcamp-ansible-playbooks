@@ -1,0 +1,15 @@
+---
+- name: Install required packages for mounting the EFS volume
+  ansible.builtin.apt:
+    name: nfs-common
+    state: present
+
+- name: Mount EFS volume to the data directory
+  ansible.posix.mount:
+    src: "{{ wordpress_efs_endpoint }}:/"
+    path: "{{ wordpress_html_dir }}"
+    # Ref: https://docs.aws.amazon.com/efs/latest/ug/mounting-fs-nfs-mount-settings.html
+    opts: nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport
+    fstype: nfs
+    boot: true
+    state: mounted

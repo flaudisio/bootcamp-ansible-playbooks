@@ -1,0 +1,4 @@
+# {{ ansible_managed }}
+
+session.save_handler = memcached
+session.save_path = {{ wordpress_memcached_endpoint }}

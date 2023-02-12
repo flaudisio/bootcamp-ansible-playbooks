@@ -1,0 +1,6 @@
+---
+- name: Restart WordPress
+  community.docker.docker_compose:
+    project_name: wordpress
+    project_src: "{{ wordpress_install_dir }}"
+    restarted: true
