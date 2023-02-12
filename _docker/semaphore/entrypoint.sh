@@ -50,7 +50,6 @@ configure_ssh_client()
 
     if ! grep -q 'entrypoint.sh' /etc/ssh/ssh_config ; then
         printf "# entrypoint.sh\nHost *\n  LogLevel %s\n" "$SSH_LOG_LEVEL" >> /etc/ssh/ssh_config
-        return 0
     fi
 }
 
