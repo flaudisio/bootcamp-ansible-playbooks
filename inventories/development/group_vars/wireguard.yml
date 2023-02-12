@@ -39,6 +39,6 @@ wg_portal_admin_password_ssm_parameter: /wireguard/wg-portal-admin-password
 # ------------------------------------------------------------------------------
 
 caddy_config: |
-  https://vpn.dev.bootcamp.flaudisio.com {
-    reverse_proxy localhost:8123
+  {{ wg_portal_external_url }} {
+    reverse_proxy {{ wg_portal_listening_address }}
   }
