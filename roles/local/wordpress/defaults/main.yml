@@ -1,0 +1,28 @@
+---
+wordpress_install_dir: /opt/wordpress-docker
+wordpress_volume_base_dir: /srv/wordpress-docker
+wordpress_html_dir: "{{ wordpress_volume_base_dir }}/html"
+
+wordpress_app_port: 8080
+
+wordpress_credentials_ssm_enabled: false
+wordpress_credentials_ssm_region: us-east-1
+
+wordpress_db_host: localhost
+wordpress_db_name: wordpress
+wordpress_db_user: wordpress
+wordpress_db_pass: ChangeMe!123
+
+wordpress_image_repo: flaudisio/bootcamp-wordpress
+wordpress_image_tag: 6.1.1-php8.2-fpm-alpine
+
+wordpress_caddy_image: caddy:2.6.2-alpine
+
+wordpress_memcached_enabled: false
+wordpress_memcached_endpoint: localhost:11211
+
+wordpress_efs_enabled: false
+wordpress_efs_endpoint: fs-aaa111.efs.us-east-1.amazonaws.com
+
+wordpress_site_url: http://example.com
+wordpress_force_ssl_admin: false

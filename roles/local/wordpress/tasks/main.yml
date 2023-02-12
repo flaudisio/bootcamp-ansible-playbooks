@@ -1,0 +1,52 @@
+---
+- name: Ensure installation directory exists
+  ansible.builtin.file:
+    path: "{{ wordpress_install_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  tags: wordpress:install
+
+- name: Ensure base data directory exists
+  ansible.builtin.file:
+    path: "{{ wordpress_volume_base_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  tags: wordpress:install
+
+- name: Include EFS-related tasks
+  ansible.builtin.include_tasks: efs.yml
+  when: wordpress_efs_enabled | bool
+  tags: wordpress:efs
+
+- name: Create configuration files
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ wordpress_install_dir }}/{{ item | replace('.j2', '') }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - Caddyfile.j2
+    - memcached.ini.j2
+  notify: Restart WordPress
+  tags: wordpress:config
+
+- name: Create the Docker Compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ wordpress_install_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: 0600
+  tags: wordpress:config
+
+- name: Ensure containers are running
+  community.docker.docker_compose:
+    project_name: wordpress
+    project_src: "{{ wordpress_install_dir }}"
+    state: present
+  tags: wordpress:service

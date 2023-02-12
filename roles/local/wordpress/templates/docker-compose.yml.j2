@@ -1,0 +1,49 @@
+#jinja2:lstrip_blocks: True
+# {{ ansible_managed }}
+
+version: "2.4"
+
+x-credentials:
+  {% if wordpress_credentials_ssm_enabled | bool %}
+  - &db_name {{ lookup('amazon.aws.aws_ssm', wordpress_db_name, region=wordpress_credentials_ssm_region) }}
+  - &db_user {{ lookup('amazon.aws.aws_ssm', wordpress_db_user, region=wordpress_credentials_ssm_region) }}
+  - &db_pass {{ lookup('amazon.aws.aws_ssm', wordpress_db_pass, region=wordpress_credentials_ssm_region) }}
+  {% else %}
+  - &db_name {{ wordpress_db_name }}
+  - &db_user {{ wordpress_db_user }}
+  - &db_pass {{ wordpress_db_pass }}
+  {% endif %}
+
+services:
+  wordpress:
+    image: {{ wordpress_image_repo }}:{{ wordpress_image_tag }}
+    container_name: wordpress-app
+    restart: unless-stopped
+    volumes:
+      - {{ wordpress_html_dir }}:/var/www/html
+      {% if wordpress_memcached_enabled %}
+      - ./memcached.ini:/usr/local/etc/php/conf.d/memcached.ini:ro
+      {% endif %}
+    environment:
+      WORDPRESS_DB_HOST: {{ wordpress_db_host }}
+      WORDPRESS_DB_NAME: *db_name
+      WORDPRESS_DB_USER: *db_user
+      WORDPRESS_DB_PASSWORD: *db_pass
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_SITEURL', '{{ wordpress_site_url }}');
+        define('WP_HOME', '{{ wordpress_site_url }}');
+        define('FORCE_SSL_ADMIN', {{ wordpress_force_ssl_admin | string | lower }});
+
+  caddy:
+    image: {{ wordpress_caddy_image }}
+    container_name: wordpress-caddy
+    restart: unless-stopped
+    user: "82:82" # PHP-FPM user ID from WordPress image
+    ports:
+      - "{{ wordpress_app_port }}:{{ wordpress_app_port }}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    volumes_from:
+      - wordpress
+    depends_on:
+      - wordpress
