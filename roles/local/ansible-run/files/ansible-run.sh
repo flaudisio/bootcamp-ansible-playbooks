@@ -152,42 +152,48 @@ install_system_deps()
 
 update_playbooks_repo()
 {
+    local -r remote_branch="origin/$PLAYBOOKS_REPO_VERSION"
     local -r status_file="/var/tmp/${ProgramName}.checksum"
     local saved_commit
     local head_commit
 
     if [[ ! -d "$PlaybooksRepoDir" ]] ; then
-        _msg "--> Cloning Playbooks repository..."
+        _msg "--> Cloning Playbooks repository"
 
-        _run git clone "$PlaybooksRepoUrl" "$PlaybooksRepoDir"
+        _run git clone --quiet "$PlaybooksRepoUrl" "$PlaybooksRepoDir"
         _run git -C "$PlaybooksRepoDir" checkout "$PLAYBOOKS_REPO_VERSION"
 
         return 0
     fi
 
-    _run pushd "$PlaybooksRepoDir"
+    _msg "--> Updating refs"
+
+    _run git -C "$PlaybooksRepoDir" fetch --all --prune --quiet
 
     saved_commit="$( cat "$status_file" 2> /dev/null )"
-    head_commit="$( git rev-parse HEAD 2> /dev/null )"
+    head_commit="$( git -C "$PlaybooksRepoDir" rev-parse "$remote_branch" 2> /dev/null )"
+
+    _msg "--> Checking current commit"
 
     if [[ "$saved_commit" == "$head_commit" ]] ; then
-        _msg "--> The saved commit is the HEAD commit; no need to update the repository"
+        _msg "--> The saved commit is the current commit on HEAD ($PLAYBOOKS_REPO_VERSION); no need to update the repository"
         return 0
     fi
 
-    _msg "--> Saving current repo commit"
+    _msg "--> Updating repository"
 
-    echo "$head_commit" > "$status_file"
-
-    _msg "--> Updating repository..."
+    _run pushd "$PlaybooksRepoDir"
 
     _run git checkout --force "$PLAYBOOKS_REPO_VERSION"
-    _run git fetch --all --prune
-    _run git reset --hard "origin/$PLAYBOOKS_REPO_VERSION"
+    _run git reset --hard "$remote_branch"
 
     _msg "--> Repository updated!"
 
     _run popd
+
+    _msg "--> Saving current repo commit"
+
+    echo "$head_commit" > "$status_file"
 }
 
 install_ansible()
