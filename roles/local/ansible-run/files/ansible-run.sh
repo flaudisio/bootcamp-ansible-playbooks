@@ -196,18 +196,15 @@ update_playbooks_repo()
     echo "$head_commit" > "$status_file"
 }
 
-install_ansible()
+update_ansible()
 {
+    _msg "--> Installing/updating Ansible and playbook dependencies"
+
+    _run_with_retry make -C "$PlaybooksRepoDir" install-all VENV_DIR="$AnsibleVenvDir"
+
     # NOTE: the venv dir must be added to the *end* of PATH so the Python binaries
     # in the control and managed virtualenvs are NOT symlinked to the venv binary
     _run export PATH="${PATH}:${AnsibleVenvDir}/bin"
-
-    # Skip installation if Ansible is already found in PATH
-    command -v ansible > /dev/null && return 0
-
-    _msg "--> Installing Ansible"
-
-    _run_with_retry make -C "$PlaybooksRepoDir" install-all VENV_DIR="$AnsibleVenvDir"
 }
 
 run_ansible_playbooks()
@@ -264,7 +261,7 @@ main()
     check_required_vars
     install_system_deps
     update_playbooks_repo
-    install_ansible
+    update_ansible
     run_ansible_playbooks
     save_config
 
