@@ -171,6 +171,19 @@ run_ansible_playbooks()
     _msg "--> Ansible playbooks successfully run!"
 }
 
+create_ansible_run_config()
+{
+    local -r config_file="/etc/ansible-run.conf"
+
+    _msg "--> Creating ansible-run config"
+
+    cat <<EOF > "$config_file"
+ENVIRONMENT="${ENVIRONMENT}"
+SERVICE="${SERVICE}"
+ROLE="${ROLE}"
+EOF
+}
+
 do_cleanup()
 {
     if [[ -n "$DISABLE_CLEANUP" ]] ; then
@@ -194,6 +207,7 @@ main()
     install_system_deps
     install_ansible
     run_ansible_playbooks
+    create_ansible_run_config
 }
 
 
