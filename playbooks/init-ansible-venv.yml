@@ -18,7 +18,6 @@
 
   vars:
     ansible_python_interpreter: /usr/bin/env python3
-    control_venv_dir: /opt/ansible-control
     management_venv_dir: /opt/ansible-host
 
   tasks:
@@ -31,20 +30,8 @@
 
     - name: Copy requirements files to host
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/../_requirements/{{ item }}"
-        dest: "/tmp/{{ item }}"
-      loop:
-        - control-nodes.txt
-        - managed-nodes.txt
-
-    - name: Install dependencies to the control virtualenv
-      ansible.builtin.pip:
-        requirements: /tmp/control-nodes.txt
-        virtualenv: "{{ control_venv_dir }}"
-        virtualenv_command: python3 -m venv --upgrade "{{ control_venv_dir }}"
-      register: pip_output
-      changed_when: >
-        (pip_output.stdout_lines | select("match", "^Requirement already satisfied") | length) != (pip_output.stdout_lines | length)
+        src: "{{ playbook_dir }}/../_requirements/managed-nodes.txt"
+        dest: /tmp/managed-nodes.txt
 
     - name: Install dependencies to the management virtualenv
       ansible.builtin.pip:
