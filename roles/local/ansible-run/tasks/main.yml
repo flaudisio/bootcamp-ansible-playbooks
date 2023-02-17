@@ -13,7 +13,6 @@
     env: true
     name: PATH
     job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-    user: root
     cron_file: ansible-run
     state: present
   tags: ansible-run:cron
