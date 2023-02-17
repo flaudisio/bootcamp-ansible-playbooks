@@ -106,7 +106,7 @@ setup_logging()
 
 load_config()
 {
-    # Config is not required in the first run
+    # Config is not required in user data mode
     _is_user_data && return 0
 
     # shellcheck disable=SC1090
@@ -141,7 +141,7 @@ check_required_vars()
 
 install_system_deps()
 {
-    # Only required in the first run
+    # Only required in user data mode
     _is_user_data || return 0
 
     _msg "--> Installing system dependencies"
@@ -236,7 +236,7 @@ run_ansible_playbooks()
 
 save_config()
 {
-    # Only required in the first run
+    # Only required in user data mode
     _is_user_data || return 0
 
     _msg "--> Saving config file"
