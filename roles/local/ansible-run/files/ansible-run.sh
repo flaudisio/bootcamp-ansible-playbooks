@@ -236,7 +236,10 @@ run_ansible_playbooks()
 
 save_config()
 {
-    _msg "--> Creating config file"
+    # Only required in the first run
+    _is_user_data || return 0
+
+    _msg "--> Saving config file"
 
     cat <<EOF > "$ConfigFile"
 ENVIRONMENT="${ENVIRONMENT}"
