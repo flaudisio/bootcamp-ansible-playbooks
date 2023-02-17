@@ -1,0 +1,18 @@
+---
+- name: System update
+  hosts: all
+
+  tasks:
+    - name: Update all packages
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        update_cache: true
+        cache_valid_time: 3600
+      tags: update:packages
+
+    - name: Remove dependencies that are no longer required
+      ansible.builtin.apt:
+        autoremove: true
+        purge: true
+      tags: update:autoremove
