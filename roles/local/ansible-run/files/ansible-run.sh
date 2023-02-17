@@ -182,14 +182,10 @@ update_playbooks_repo()
 
     _msg "--> Updating repository"
 
-    _run pushd "$PlaybooksRepoDir"
-
-    _run git checkout --force "$PLAYBOOKS_REPO_VERSION"
-    _run git reset --hard "$remote_branch"
+    _run git -C "$PlaybooksRepoDir" checkout --force "$PLAYBOOKS_REPO_VERSION"
+    _run git -C "$PlaybooksRepoDir" reset --hard "$remote_branch"
 
     _msg "--> Repository updated!"
-
-    _run popd
 
     _msg "--> Saving current repo commit"
 
