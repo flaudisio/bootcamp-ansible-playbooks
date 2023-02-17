@@ -12,7 +12,7 @@
   ansible.builtin.cron:
     env: true
     name: PATH
-    job: "/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin"
+    job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin
     user: root
     cron_file: ansible-run
     state: present
