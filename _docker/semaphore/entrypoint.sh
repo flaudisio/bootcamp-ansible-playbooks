@@ -35,7 +35,6 @@ fix_directory_permissions()
         if ! gosu semaphore touch "${data_dir}/.docker-entrypoint-probe" 2> /dev/null ; then
             msg "[INFO] Fixing permissions for $data_dir"
 
-            # Fix directory permissions
             if ! chown -R semaphore "$data_dir" ; then
                 msg "[ERROR] Could not fix $data_dir permissions; please check your environment. Aborting Docker entrypoint" >&2
                 exit 1
