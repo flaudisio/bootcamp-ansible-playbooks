@@ -11,14 +11,15 @@ set -x
 set -e
 set -o pipefail
 
-: "${PLAYBOOKS_REPO_VERSION:="main"}"
-export PLAYBOOKS_REPO_VERSION
+: "${REPO_VERSION:="main"}"
+
+export REPO_VERSION
 
 
 main()
 {
     curl -m 5 --retry 2 -fL \
-        "https://raw.githubusercontent.com/flaudisio/bootcamp-ansible-playbooks/${PLAYBOOKS_REPO_VERSION}/roles/local/ansible-run/files/ansible-run.sh" \
+        "https://raw.githubusercontent.com/flaudisio/bootcamp-ansible-playbooks/${REPO_VERSION}/roles/local/ansible-run/files/ansible-run.sh" \
         -o /tmp/ansible-run.sh
 
     bash /tmp/ansible-run.sh --user-data

@@ -12,16 +12,16 @@ set -o pipefail
 readonly ProgramName="ansible-run"
 readonly ProgramVersion="0.1.0"
 
-readonly PlaybooksRepoUrl="https://github.com/flaudisio/bootcamp-ansible-playbooks.git"
-readonly PlaybooksRepoDir="/opt/ansible-playbooks"
+readonly RepoUrl="https://github.com/flaudisio/bootcamp-ansible-playbooks.git"
+readonly RepoDir="/opt/ansible-playbooks"
 readonly AnsibleVenvDir="/opt/ansible-control"
 
 readonly ConfigFile="/etc/ansible-run.conf"
 readonly LogFile="/var/log/ansible-run.log"
 
 # Initialize environment variables
+: "${REPO_VERSION:="main"}"
 : "${USER_DATA_MODE:=""}"
-: "${PLAYBOOKS_REPO_VERSION:="main"}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
 
 
@@ -152,38 +152,38 @@ install_system_deps()
 
 update_playbooks_repo()
 {
-    local -r remote_branch="origin/$PLAYBOOKS_REPO_VERSION"
+    local -r remote_branch="origin/$REPO_VERSION"
     local -r status_file="/var/tmp/${ProgramName}.checksum"
     local saved_commit
     local head_commit
 
-    if [[ ! -d "$PlaybooksRepoDir" ]] ; then
+    if [[ ! -d "$RepoDir" ]] ; then
         _msg "--> Cloning Playbooks repository"
 
-        _run git clone --quiet "$PlaybooksRepoUrl" "$PlaybooksRepoDir"
-        _run git -C "$PlaybooksRepoDir" checkout "$PLAYBOOKS_REPO_VERSION"
+        _run git clone --quiet "$RepoUrl" "$RepoDir"
+        _run git -C "$RepoDir" checkout "$REPO_VERSION"
 
         return 0
     fi
 
     _msg "--> Updating refs"
 
-    _run git -C "$PlaybooksRepoDir" fetch --all --prune --quiet
+    _run git -C "$RepoDir" fetch --all --prune --quiet
 
     saved_commit="$( cat "$status_file" 2> /dev/null )"
-    head_commit="$( git -C "$PlaybooksRepoDir" rev-parse "$remote_branch" 2> /dev/null )"
+    head_commit="$( git -C "$RepoDir" rev-parse "$remote_branch" 2> /dev/null )"
 
     _msg "--> Checking current commit"
 
     if [[ "$saved_commit" == "$head_commit" ]] ; then
-        _msg "--> The saved commit is the current commit on HEAD ($PLAYBOOKS_REPO_VERSION); no need to update the repository"
+        _msg "--> The saved commit is the current commit on HEAD ($REPO_VERSION); no need to update the repository"
         return 0
     fi
 
     _msg "--> Updating repository"
 
-    _run git -C "$PlaybooksRepoDir" checkout --force "$PLAYBOOKS_REPO_VERSION"
-    _run git -C "$PlaybooksRepoDir" reset --hard "$remote_branch"
+    _run git -C "$RepoDir" checkout --force "$REPO_VERSION"
+    _run git -C "$RepoDir" reset --hard "$remote_branch"
 
     _msg "--> Repository updated!"
 
@@ -196,7 +196,7 @@ update_ansible()
 {
     _msg "--> Installing/updating Ansible and playbook dependencies"
 
-    _run_with_retry make -C "$PlaybooksRepoDir" install-all VENV_DIR="$AnsibleVenvDir"
+    _run_with_retry make -C "$RepoDir" install-all VENV_DIR="$AnsibleVenvDir"
 
     # NOTE: the venv dir must be added to the *end* of PATH so the Python binaries
     # in the control and managed virtualenvs are NOT symlinked to the venv binary
@@ -210,7 +210,7 @@ run_ansible_playbooks()
     local -r instance_ip="$( curl -m 1 --retry 2 -fsSL http://169.254.169.254/latest/meta-data/local-ipv4 )"
     local -r ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$instance_ip" )
 
-    _run pushd "$PlaybooksRepoDir"
+    _run pushd "$RepoDir"
 
     _msg "--> Checking if inventory and playbook files exist"
 
