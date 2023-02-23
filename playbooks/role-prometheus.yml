@@ -1,0 +1,11 @@
+---
+- name: Deploy Prometheus server
+  hosts: all
+
+  roles:
+    - role: base
+      tags: [base]
+    - role: docker
+      tags: [docker]
+    - role: prometheus
+      tags: [prometheus]
