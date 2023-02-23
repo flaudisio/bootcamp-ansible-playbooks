@@ -1,0 +1,32 @@
+#jinja2:lstrip_blocks: True
+# {{ ansible_managed }}
+
+version: "2.4"
+
+services:
+  {% if prometheus_timestream_enabled | bool %}
+  timestream-adapter:
+    image: {{ prometheus_timestream_adapter_image }}
+    container_name: prometheus-timestream-adapter
+    restart: unless-stopped
+    command: >
+      --awsRegion {{ prometheus_timestream_region }}
+      --databaseName {{ prometheus_timestream_database }}
+      --tableName {{ prometheus_timestream_table }}
+  {% endif %}
+
+  prometheus:
+    image: {{ prometheus_image_repo }}:{{ prometheus_image_tag }}
+    container_name: prometheus-app
+    restart: unless-stopped
+    ports:
+      - "{{ prometheus_http_port }}:9090"
+      - "{{ prometheus_pushgateway_port }}:9091"
+      - "{{ prometheus_node_exporter_port }}:9100"
+    volumes:
+      - {{ prometheus_data_dir }}:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    {% if prometheus_timestream_enabled | bool %}
+    depends_on:
+      - timestream-adapter
+    {% endif %}

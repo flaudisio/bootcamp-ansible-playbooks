@@ -1,0 +1,6 @@
+---
+- name: Restart Prometheus
+  community.docker.docker_compose:
+    project_name: prometheus
+    project_src: "{{ prometheus_install_dir }}"
+    restarted: true

@@ -1,0 +1,20 @@
+---
+prometheus_scrape_configs:
+  - job_name: wordpress-sites
+    scrape_timeout: 3s
+    metrics_path: /metrics
+    ec2_sd_configs:
+      - port: 8080
+        filters:
+          - name: tag-key
+            values: ["prometheus:wordpress-sites"]
+    relabel_configs:
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance
+      - source_labels: [__meta_ec2_tag_service]
+        target_label: site_name
+
+prometheus_timestream_enabled: true
+prometheus_timestream_region: us-east-1
+prometheus_timestream_database: prometheus-server
+prometheus_timestream_table: prometheus-server
