@@ -12,6 +12,14 @@ prometheus_http_port: 9090
 prometheus_pushgateway_port: 9091
 prometheus_node_exporter_port: 9100
 
+prometheus_scrape_configs: []
+# - job_name: example-app
+#   ec2_sd_configs:
+#     - port: 3000
+#       filters:
+#         - name: tag:app-name
+#           values: [example-app]
+
 prometheus_timestream_adapter_image: dpattmann/prometheus-timestream-adapter:0.6
 
 prometheus_timestream_enabled: false

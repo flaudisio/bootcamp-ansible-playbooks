@@ -10,6 +10,10 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:{{ prometheus_http_port }}"]
 
+  {% for config in prometheus_scrape_configs %}
+  - {{ config | to_nice_yaml(indent=2, sort_keys=False) | indent(4) }}
+  {% endfor %}
+
 {% if prometheus_timestream_enabled | bool %}
 remote_write:
   - url: "http://timestream-adapter:9201/write"
