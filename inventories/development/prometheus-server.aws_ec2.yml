@@ -1,0 +1,17 @@
+---
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1
+strict: false
+strict_permissions: true
+leading_separator: false
+keyed_groups:
+  - key: tags["service"]
+    prefix: ""
+hostnames:
+  - private-ip-address
+compose:
+  ansible_host: private_ip_address
+filters:
+  instance-state-name: running
+  tag:service: prometheus-server
