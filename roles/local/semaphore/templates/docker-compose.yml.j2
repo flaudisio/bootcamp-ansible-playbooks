@@ -34,7 +34,7 @@ services:
      POSTGRES_PASSWORD: *db_pass
 
   semaphore:
-    image: {{ semaphore_server_image_repo }}:{{ semaphore_server_image_tag }}
+    image: {{ semaphore_image_repo }}:{{ semaphore_image_tag }}
     restart: unless-stopped
     container_name: semaphore-app
     ports:
@@ -56,26 +56,5 @@ services:
       SEMAPHORE_ADMIN_EMAIL: {{ semaphore_admin_email }}
       SEMAPHORE_TMP_PATH: /tmp/semaphore
       SEMAPHORE_WEB_ROOT: {{ semaphore_web_root }}
-    depends_on:
-      - postgres
-
-  pgbackups:
-    image: {{ semaphore_pgbackups_image }}
-    restart: unless-stopped
-    container_name: semaphore-pgbackups
-    user: postgres:postgres
-    volumes:
-      - {{ semaphore_pgbackups_data_dir }}:/backups
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_DB: *db_name
-      POSTGRES_USER: *db_user
-      POSTGRES_PASSWORD: *db_pass
-      POSTGRES_EXTRA_OPTS: -Z6 --schema=public --blobs
-      SCHEDULE: "{{ semaphore_pgbackups_schedule }}"
-      BACKUP_KEEP_DAYS: "{{ semaphore_pgbackups_keep_days }}"
-      BACKUP_KEEP_WEEKS: "{{ semaphore_pgbackups_keep_weeks }}"
-      BACKUP_KEEP_MONTHS: "{{ semaphore_pgbackups_keep_months }}"
-      HEALTHCHECK_PORT: "8080"
     depends_on:
       - postgres

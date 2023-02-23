@@ -1,9 +1,11 @@
 ---
-# Postgres
+semaphore_image_repo: flaudisio/bootcamp-semaphore
+semaphore_image_tag: "2.8.77"
 
-semaphore_postgres_image: postgres:14-alpine
+semaphore_install_dir: /opt/semaphore-docker
+semaphore_volume_base_dir: /srv/semaphore-docker
 
-# Semaphore
+semaphore_port: 3000
 
 semaphore_credentials_ssm_enabled: false
 semaphore_credentials_ssm_region: us-east-1
@@ -13,27 +15,10 @@ semaphore_postgres_db_user: semaphore
 semaphore_postgres_db_pass: ChangeMe!123
 semaphore_access_key_encryption: RL0bX8n9hCFRmRZw+qAfvj6kYanrpI3481ZkpcQqe4I=
 
-semaphore_server_image_repo: flaudisio/bootcamp-semaphore
-semaphore_server_image_tag: "2.8.77"
-
-semaphore_install_dir: /opt/semaphore-docker
-semaphore_volume_base_dir: /srv/semaphore-docker
-
-semaphore_port: 3000
-
 semaphore_admin_username: admin
 semaphore_admin_password: ChangeMe!123
 semaphore_admin_name: Semaphore Admin
 semaphore_admin_email: admin@example.com
 semaphore_web_root: http://semaphore.example.com:3000
 
-# pgbackups
-
-semaphore_pgbackups_image: prodrigestivill/postgres-backup-local:14-alpine
-semaphore_pgbackups_uid: 70  # 70 for Alpine image, 999 for Debian image
-semaphore_pgbackups_data_dir: "{{ semaphore_volume_base_dir }}/pgbackups"
-
-semaphore_pgbackups_schedule: "5 */2 * * *"
-semaphore_pgbackups_keep_days: "7"
-semaphore_pgbackups_keep_weeks: "4"
-semaphore_pgbackups_keep_months: "3"
+semaphore_postgres_image: postgres:14-alpine
