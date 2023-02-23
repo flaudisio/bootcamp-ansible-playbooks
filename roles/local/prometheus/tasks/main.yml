@@ -1,0 +1,44 @@
+---
+- name: Ensure installation directory exists
+  ansible.builtin.file:
+    path: "{{ prometheus_install_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  tags: prometheus:install
+
+- name: Ensure data directory exists
+  ansible.builtin.file:
+    path: "{{ prometheus_data_dir }}"
+    state: directory
+    owner: "{{ prometheus_container_uid }}"
+    group: "{{ prometheus_container_gid }}"
+    mode: 0700
+  tags: prometheus:install
+
+- name: Create configuration file
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: "{{ prometheus_install_dir }}/prometheus.yml"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart Prometheus
+  tags: prometheus:config
+
+- name: Create the Docker Compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ prometheus_install_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: 0644
+  tags: prometheus:config
+
+- name: Ensure containers are running
+  community.docker.docker_compose:
+    project_name: prometheus
+    project_src: "{{ prometheus_install_dir }}"
+    state: present
+  tags: prometheus:service

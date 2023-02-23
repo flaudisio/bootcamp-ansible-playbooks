@@ -1,0 +1,20 @@
+---
+prometheus_install_dir: /opt/prometheus-docker
+prometheus_data_dir: /srv/prometheus-docker/data
+
+prometheus_image_repo: prom/prometheus
+prometheus_image_tag: v2.37.6
+
+prometheus_container_uid: 65534
+prometheus_container_gid: 65534
+
+prometheus_http_port: 9090
+prometheus_pushgateway_port: 9091
+prometheus_node_exporter_port: 9100
+
+prometheus_timestream_adapter_image: dpattmann/prometheus-timestream-adapter:0.6
+
+prometheus_timestream_enabled: false
+prometheus_timestream_region: us-east-1
+prometheus_timestream_database: prometheus
+prometheus_timestream_table: prometheus
