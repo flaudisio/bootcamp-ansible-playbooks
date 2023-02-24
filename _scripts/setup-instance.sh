@@ -13,8 +13,6 @@ set -o pipefail
 
 : "${REPO_VERSION:="main"}"
 
-export REPO_VERSION
-
 
 main()
 {
