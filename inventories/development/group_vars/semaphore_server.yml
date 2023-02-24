@@ -18,6 +18,14 @@ semaphore_admin_name: Semaphore Admin
 semaphore_admin_email: flaudisio+semaphore-admin@gmail.com
 semaphore_web_root: http://semaphore.dev.bootcamp.flaudisio.com
 
+semaphore_postgres_s3_backup_enabled: true
+
+semaphore_postgres_s3_backup_schedule: "0 5 */2 * * *"
+semaphore_postgres_s3_backup_bucket: semaphore-backups-development-957126594283-us-east-1
+semaphore_postgres_s3_backup_region: us-east-1
+
+semaphore_postgres_s3_restore_enabled: true
+
 # ------------------------------------------------------------------------------
 # caddy
 # ------------------------------------------------------------------------------
