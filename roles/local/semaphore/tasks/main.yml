@@ -31,7 +31,7 @@
     mode: 0600
   tags: semaphore:config
 
-- name: Ensure container is running
+- name: Ensure containers are running
   community.docker.docker_compose:
     project_name: semaphore
     project_src: "{{ semaphore_install_dir }}"
