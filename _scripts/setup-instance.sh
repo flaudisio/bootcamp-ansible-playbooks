@@ -2,8 +2,7 @@
 #
 # setup-instance.sh
 #
-# Bootstrap an EC2 instance from its user data using the specified Ansible
-# inventory and playbook.
+# Bootstrap an EC2 instance using the 'ansible-run' script in user data mode.
 #
 ##
 
