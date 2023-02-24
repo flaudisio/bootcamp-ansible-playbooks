@@ -22,6 +22,7 @@ semaphore_admin_email: admin@example.com
 semaphore_web_root: http://semaphore.example.com:3000
 
 semaphore_postgres_image: postgres:14-alpine
+semaphore_postgres_data_dir: "{{ semaphore_volume_base_dir }}/postgres-data"
 
 semaphore_postgres_s3_backup_enabled: false
 semaphore_postgres_s3_backup_image: schickling/postgres-backup-s3:latest

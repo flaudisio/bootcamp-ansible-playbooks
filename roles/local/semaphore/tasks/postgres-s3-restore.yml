@@ -1,25 +1,37 @@
 ---
-- name: Ensure Postgres S3 restore directory exists
-  ansible.builtin.file:
-    path: "{{ semaphore_postgres_s3_restore_dir }}"
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
+- name: List Postgres data directory files
+  ansible.builtin.shell: >
+    ls -A "{{ semaphore_postgres_data_dir }}" || true
+  register: semaphore_postgres_data_dir_files
+  changed_when: false
 
-- name: List available backup files in the S3 bucket
-  amazon.aws.s3_object:
-    bucket: "{{ semaphore_postgres_s3_backup_bucket }}"
-    mode: list
-  register: semaphore_postgres_s3_restore_list
+- name: Run restore tasks if necessary
+  block:
+    - name: Ensure Postgres S3 restore directory exists
+      ansible.builtin.file:
+        path: "{{ semaphore_postgres_s3_restore_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
 
-- name: Set variable with the latest available Postgres backup file
-  ansible.builtin.set_fact:
-    semaphore_postgres_s3_restore_file: "{{ semaphore_postgres_s3_restore_list.s3_keys | sort | last }}"
+    - name: List available backup files in the S3 bucket
+      amazon.aws.s3_object:
+        bucket: "{{ semaphore_postgres_s3_backup_bucket }}"
+        mode: list
+      register: semaphore_postgres_s3_restore_list
 
-- name: Copy backup file to Postgres S3 restore directory
-  amazon.aws.s3_object:
-    bucket: "{{ semaphore_postgres_s3_backup_bucket }}"
-    object: "{{ semaphore_postgres_s3_restore_file }}"
-    dest: "{{ semaphore_postgres_s3_restore_dir }}/{{ semaphore_postgres_s3_restore_file }}"
-    mode: get
+    - name: Set variable with the latest available Postgres backup file
+      ansible.builtin.set_fact:
+        semaphore_postgres_s3_restore_file: "{{ semaphore_postgres_s3_restore_list.s3_keys | sort | last }}"
+      when: semaphore_postgres_s3_restore_list.s3_keys | length > 0
+
+    - name: Copy backup file to Postgres S3 restore directory
+      amazon.aws.s3_object:
+        bucket: "{{ semaphore_postgres_s3_backup_bucket }}"
+        object: "{{ semaphore_postgres_s3_restore_file }}"
+        dest: "{{ semaphore_postgres_s3_restore_dir }}/{{ semaphore_postgres_s3_restore_file }}"
+        mode: get
+      when: semaphore_postgres_s3_restore_file is defined
+  when:
+    - semaphore_postgres_data_dir_files.stdout_lines | length == 0

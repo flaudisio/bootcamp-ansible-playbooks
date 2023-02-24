@@ -28,7 +28,7 @@ services:
     container_name: semaphore-postgres
     hostname: postgres
     volumes:
-      - {{ semaphore_volume_base_dir }}/postgres-data:/var/lib/postgresql/data
+      - {{ semaphore_postgres_data_dir }}:/var/lib/postgresql/data
       - {{ semaphore_postgres_s3_restore_dir }}:/docker-entrypoint-initdb.d:ro
     environment:
      POSTGRES_DATABASE: *db_name
