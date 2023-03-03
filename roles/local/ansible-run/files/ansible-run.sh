@@ -207,8 +207,14 @@ run_ansible_playbooks()
 {
     local -r inventory_file="inventories/${ENVIRONMENT}/${SERVICE}.aws_ec2.yml"
     local -r playbook_file="playbooks/role-${ROLE}.yml"
-    local -r instance_ip="$( curl -m 1 --retry 2 -fsSL http://169.254.169.254/latest/meta-data/local-ipv4 )"
-    local -r ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$instance_ip" )
+
+    _msg "--> Getting instance IP"
+
+    local -r instance_ip="$( _run curl -m 1 --retry 2 -fsSL http://169.254.169.254/latest/meta-data/local-ipv4 )"
+
+    _msg "--> Setting Ansible options"
+
+    local ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$instance_ip" )
 
     _run pushd "$RepoDir"
 
