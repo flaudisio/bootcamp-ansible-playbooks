@@ -29,6 +29,7 @@
     owner: root
     group: root
     mode: 0600
+  notify: Recreate Semaphore containers
   tags: semaphore:config
 
 - name: Ensure containers are running
