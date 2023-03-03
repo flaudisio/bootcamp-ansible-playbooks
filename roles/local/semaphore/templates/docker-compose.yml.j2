@@ -63,8 +63,6 @@ services:
       {% if semaphore_postgres_s3_backup_prefix != "" %}
       S3_PREFIX: "{{ semaphore_postgres_s3_backup_prefix }}"
       {% endif %}
-      {% if semaphore_postgres_s3_backup_access_key_id and semaphore_postgres_s3_backup_secret_access_key %}
       S3_ACCESS_KEY_ID: "{{ semaphore_postgres_s3_backup_access_key_id }}"
       S3_SECRET_ACCESS_KEY: "{{ semaphore_postgres_s3_backup_secret_access_key }}"
-      {% endif %}
     {% endif %}
