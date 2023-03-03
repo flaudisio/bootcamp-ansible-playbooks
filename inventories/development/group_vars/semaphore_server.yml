@@ -1,14 +1,12 @@
 ---
-# ------------------------------------------------------------------------------
-# semaphore
-# ------------------------------------------------------------------------------
-
 semaphore_credentials_ssm_enabled: true
 semaphore_credentials_ssm_region: us-east-1
 
+semaphore_postgres_db_host: semaphore-server-db.dev.bootcamp.flaudisio.com
 semaphore_postgres_db_name: /semaphore-server/db-name
 semaphore_postgres_db_user: /semaphore-server/db-user
 semaphore_postgres_db_pass: /semaphore-server/db-pass
+
 semaphore_access_key_encryption: /semaphore-server/access-key-encryption
 
 semaphore_admin_username: /semaphore-server/admin-username
@@ -16,21 +14,9 @@ semaphore_admin_password: /semaphore-server/admin-password
 
 semaphore_admin_name: Semaphore Admin
 semaphore_admin_email: flaudisio+semaphore-admin@gmail.com
-semaphore_web_root: http://semaphore.dev.bootcamp.flaudisio.com
+semaphore_web_root: https://semaphore.dev.bootcamp.flaudisio.com
 
 semaphore_postgres_s3_backup_enabled: true
-
-semaphore_postgres_s3_backup_schedule: "0 5 */2 * * *"
+semaphore_postgres_s3_backup_schedule: "0 5 * * * *"
 semaphore_postgres_s3_backup_bucket: semaphore-backups-development-957126594283-us-east-1
 semaphore_postgres_s3_backup_region: us-east-1
-
-semaphore_postgres_s3_restore_enabled: true
-
-# ------------------------------------------------------------------------------
-# caddy
-# ------------------------------------------------------------------------------
-
-caddy_config: |
-  {{ semaphore_web_root }} {
-    reverse_proxy localhost:{{ semaphore_port }}
-  }

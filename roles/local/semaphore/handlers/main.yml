@@ -1,0 +1,7 @@
+---
+- name: Recreate Semaphore containers
+  community.docker.docker_compose:
+    project_name: semaphore
+    project_src: "{{ semaphore_install_dir }}"
+    state: present
+    recreate: always

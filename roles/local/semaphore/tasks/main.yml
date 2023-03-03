@@ -17,11 +17,6 @@
     mode: 0700
   tags: semaphore:install
 
-- name: Include Postgres S3 restore tasks
-  ansible.builtin.import_tasks: postgres-s3-restore.yml
-  when: semaphore_postgres_s3_restore_enabled | bool
-  tags: semaphore:postgres-s3-restore
-
 - name: Create the Docker Compose file
   ansible.builtin.template:
     src: docker-compose.yml.j2
@@ -29,6 +24,7 @@
     owner: root
     group: root
     mode: 0600
+  notify: Recreate Semaphore containers
   tags: semaphore:config
 
 - name: Ensure containers are running

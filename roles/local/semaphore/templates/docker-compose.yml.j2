@@ -4,7 +4,7 @@
 version: "2.4"
 
 x-credentials:
-  - &db_host postgres
+  - &db_host {{ semaphore_postgres_db_host }}
   {% if semaphore_credentials_ssm_enabled | bool %}
   - &db_name {{ lookup('amazon.aws.aws_ssm', semaphore_postgres_db_name, region=semaphore_credentials_ssm_region) }}
   - &db_user {{ lookup('amazon.aws.aws_ssm', semaphore_postgres_db_user, region=semaphore_credentials_ssm_region) }}
@@ -22,32 +22,19 @@ x-credentials:
   {% endif %}
 
 services:
-  postgres:
-    image: {{ semaphore_postgres_image }}
-    restart: unless-stopped
-    container_name: semaphore-postgres
-    hostname: postgres
-    volumes:
-      - {{ semaphore_postgres_data_dir }}:/var/lib/postgresql/data
-      - {{ semaphore_postgres_s3_restore_dir }}:/docker-entrypoint-initdb.d:ro
-    environment:
-     POSTGRES_DATABASE: *db_name
-     POSTGRES_USER: *db_user
-     POSTGRES_PASSWORD: *db_pass
-
   semaphore:
     image: {{ semaphore_image_repo }}:{{ semaphore_image_tag }}
     restart: unless-stopped
     container_name: semaphore-app
     ports:
-      - 127.0.0.1:{{ semaphore_port }}:3000
+      - {{ semaphore_port }}:3000
     volumes:
       - {{ semaphore_volume_base_dir }}/semaphore-etc:/etc/semaphore
       - {{ semaphore_volume_base_dir }}/semaphore-tmp:/tmp/semaphore
     environment:
       SEMAPHORE_DB_DIALECT: postgres
       SEMAPHORE_DB_HOST: *db_host
-      SEMAPHORE_DB_PORT: 5432
+      SEMAPHORE_DB_PORT: {{ semaphore_postgres_db_port }}
       SEMAPHORE_DB: *db_name
       SEMAPHORE_DB_USER: *db_user
       SEMAPHORE_DB_PASS: *db_pass
@@ -58,8 +45,6 @@ services:
       SEMAPHORE_ADMIN_EMAIL: {{ semaphore_admin_email }}
       SEMAPHORE_TMP_PATH: /tmp/semaphore
       SEMAPHORE_WEB_ROOT: {{ semaphore_web_root }}
-    depends_on:
-      - postgres
 
   {% if semaphore_postgres_s3_backup_enabled | bool %}
   postgres-s3-backup:
@@ -78,10 +63,6 @@ services:
       {% if semaphore_postgres_s3_backup_prefix != "" %}
       S3_PREFIX: "{{ semaphore_postgres_s3_backup_prefix }}"
       {% endif %}
-      {% if semaphore_postgres_s3_backup_access_key_id and semaphore_postgres_s3_backup_secret_access_key %}
       S3_ACCESS_KEY_ID: "{{ semaphore_postgres_s3_backup_access_key_id }}"
       S3_SECRET_ACCESS_KEY: "{{ semaphore_postgres_s3_backup_secret_access_key }}"
-      {% endif %}
-    depends_on:
-      - postgres
     {% endif %}
