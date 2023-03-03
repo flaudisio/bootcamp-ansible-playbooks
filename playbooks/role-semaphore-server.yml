@@ -9,5 +9,3 @@
       tags: [docker]
     - role: semaphore
       tags: [semaphore]
-    - role: caddy
-      tags: [caddy]
