@@ -10,9 +10,12 @@ semaphore_port: 3000
 semaphore_credentials_ssm_enabled: false
 semaphore_credentials_ssm_region: us-east-1
 
+semaphore_postgres_db_host: localhost
+semaphore_postgres_db_port: 5432
 semaphore_postgres_db_name: semaphore
 semaphore_postgres_db_user: semaphore
 semaphore_postgres_db_pass: ChangeMe!123
+
 semaphore_access_key_encryption: RL0bX8n9hCFRmRZw+qAfvj6kYanrpI3481ZkpcQqe4I=
 
 semaphore_admin_username: admin
@@ -20,9 +23,6 @@ semaphore_admin_password: ChangeMe!123
 semaphore_admin_name: Semaphore Admin
 semaphore_admin_email: admin@example.com
 semaphore_web_root: http://semaphore.example.com:3000
-
-semaphore_postgres_image: postgres:14-alpine
-semaphore_postgres_data_dir: "{{ semaphore_volume_base_dir }}/postgres-data"
 
 semaphore_postgres_s3_backup_enabled: false
 semaphore_postgres_s3_backup_image: schickling/postgres-backup-s3:latest
@@ -33,6 +33,3 @@ semaphore_postgres_s3_backup_region: us-east-1
 semaphore_postgres_s3_backup_prefix: ""
 semaphore_postgres_s3_backup_access_key_id: ""
 semaphore_postgres_s3_backup_secret_access_key: ""
-
-semaphore_postgres_s3_restore_enabled: false
-semaphore_postgres_s3_restore_dir: "{{ semaphore_volume_base_dir }}/postgres-s3-restore"
