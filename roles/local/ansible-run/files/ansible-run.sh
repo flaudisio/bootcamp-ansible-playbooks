@@ -197,7 +197,7 @@ update_ansible()
     _run export PATH="${PATH}:${AnsibleVenvDir}/bin"
 }
 
-run_ansible_playbooks()
+run_ansible()
 {
     local -r inventory_file="inventories/${ENVIRONMENT}/${SERVICE}.aws_ec2.yml"
     local -r playbook_file="playbooks/role-${ROLE}.yml"
@@ -258,7 +258,7 @@ main()
             install_system_deps
             update_playbooks_repo
             update_ansible
-            run_ansible_playbooks
+            run_ansible
             save_config
         ;;
 
@@ -269,7 +269,7 @@ main()
             check_required_vars
             update_playbooks_repo
             update_ansible
-            run_ansible_playbooks
+            run_ansible
         ;;
 
         *)
