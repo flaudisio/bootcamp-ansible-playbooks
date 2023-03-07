@@ -106,9 +106,6 @@ setup_logging()
 
 load_config()
 {
-    # Config is not required in user data mode
-    _is_user_data && return 0
-
     # shellcheck disable=SC1090
     if ! source "$ConfigFile" ; then
         _msg "Error: could not read config file '$ConfigFile'; aborting"
@@ -141,9 +138,6 @@ check_required_vars()
 
 install_system_deps()
 {
-    # Only required in user data mode
-    _is_user_data || return 0
-
     _msg "--> Installing system dependencies"
 
     DEBIAN_FRONTEND=noninteractive _run apt update -q
@@ -242,9 +236,6 @@ run_ansible_playbooks()
 
 save_config()
 {
-    # Only required in user data mode
-    _is_user_data || return 0
-
     _msg "--> Saving config file"
 
     cat <<EOF > "$ConfigFile"
@@ -258,17 +249,34 @@ main()
 {
     _msg "Starting ${ProgramName} v${ProgramVersion} at $( date --utc )"
 
-    [[ "$1" == "--user-data" ]] && USER_DATA_MODE="1"
+    case $1 in
+        --user-data)
+            _msg "--> Note: running in user data mode"
+            USER_DATA_MODE="1"
 
-    _is_user_data && _msg "--> Note: running in user data mode"
+            check_required_vars
+            install_system_deps
+            update_playbooks_repo
+            update_ansible
+            run_ansible_playbooks
+            save_config
+        ;;
 
-    load_config
-    check_required_vars
-    install_system_deps
-    update_playbooks_repo
-    update_ansible
-    run_ansible_playbooks
-    save_config
+        --cron)
+            _msg "--> Note: running in cron mode"
+
+            load_config
+            check_required_vars
+            update_playbooks_repo
+            update_ansible
+            run_ansible_playbooks
+        ;;
+
+        *)
+            _msg "Usage: $ProgramName <cron|user-data>"
+            exit 2
+        ;;
+    esac
 
     _msg "Program finished at $( date --utc )"
 }
