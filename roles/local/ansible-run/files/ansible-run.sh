@@ -255,11 +255,11 @@ main()
             USER_DATA_MODE="1"
 
             check_required_vars
+            save_config
             install_system_deps
             update_playbooks_repo
             update_ansible
             run_ansible
-            save_config
         ;;
 
         --cron)
