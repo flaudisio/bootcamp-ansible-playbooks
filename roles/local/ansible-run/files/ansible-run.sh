@@ -21,18 +21,12 @@ readonly LogFile="/var/log/ansible-run.log"
 
 # Initialize environment variables
 : "${REPO_VERSION:="main"}"
-: "${USER_DATA_MODE:=""}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
 
 
 _msg()
 {
     echo -e "$*" >&2
-}
-
-_is_user_data()
-{
-    [[ -n "$USER_DATA_MODE" ]]
 }
 
 _run()
@@ -219,7 +213,7 @@ run_ansible()
     # Output Ansible version to help on troubleshooting
     _run ansible --version
 
-    if _is_user_data ; then
+    if [[ "$1" == "--init" ]] ; then
         _msg "--> Running initialization playbooks"
 
         _run_with_retry ansible-playbook playbooks/init-ansible-venv.yml --verbose "${ansible_opts[@]}"
@@ -252,14 +246,13 @@ main()
     case $1 in
         --user-data)
             _msg "--> Note: running in user data mode"
-            USER_DATA_MODE="1"
 
             check_required_vars
             save_config
             install_system_deps
             update_playbooks_repo
             update_ansible
-            run_ansible
+            run_ansible --init
         ;;
 
         --cron)
