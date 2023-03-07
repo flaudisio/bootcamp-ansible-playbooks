@@ -20,7 +20,6 @@ readonly ConfigFile="/etc/ansible-run.conf"
 readonly LogFile="/var/log/ansible-run.log"
 
 # Initialize environment variables
-: "${EXTRA_VARS:=""}"
 : "${REPO_VERSION:="main"}"
 : "${USER_DATA_MODE:=""}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
@@ -213,20 +212,9 @@ run_ansible_playbooks()
 
     local -r instance_ip="$( _run curl -m 1 --retry 2 -fsSL http://169.254.169.254/latest/meta-data/local-ipv4 )"
 
-    _msg "--> Parsing defined extra vars"
-
-    local extra_vars=()
-
-    mapfile -t extra_vars < <( tr ',' '\n' <<< "$EXTRA_VARS" )
-
     _msg "--> Setting Ansible command options"
 
-    local ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$instance_ip" )
-    local var
-
-    for var in "${extra_vars[@]}" ; do
-        ansible_opts+=( -e "$var" )
-    done
+    local -r ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$instance_ip" )
 
     _run pushd "$RepoDir"
 
