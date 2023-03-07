@@ -20,20 +20,13 @@ readonly ConfigFile="/etc/ansible-run.conf"
 readonly LogFile="/var/log/ansible-run.log"
 
 # Initialize environment variables
-: "${EXTRA_VARS:=""}"
 : "${REPO_VERSION:="main"}"
-: "${USER_DATA_MODE:=""}"
 : "${DISABLE_OUTPUT_REDIRECT:=""}"
 
 
 _msg()
 {
     echo -e "$*" >&2
-}
-
-_is_user_data()
-{
-    [[ -n "$USER_DATA_MODE" ]]
 }
 
 _run()
@@ -107,9 +100,6 @@ setup_logging()
 
 load_config()
 {
-    # Config is not required in user data mode
-    _is_user_data && return 0
-
     # shellcheck disable=SC1090
     if ! source "$ConfigFile" ; then
         _msg "Error: could not read config file '$ConfigFile'; aborting"
@@ -142,9 +132,6 @@ check_required_vars()
 
 install_system_deps()
 {
-    # Only required in user data mode
-    _is_user_data || return 0
-
     _msg "--> Installing system dependencies"
 
     DEBIAN_FRONTEND=noninteractive _run apt update -q
@@ -171,10 +158,10 @@ update_playbooks_repo()
 
     _run git -C "$RepoDir" fetch --all --prune --quiet
 
+    _msg "--> Checking current commit"
+
     saved_commit="$( cat "$status_file" 2> /dev/null )"
     head_commit="$( git -C "$RepoDir" rev-parse "$remote_branch" 2> /dev/null )"
-
-    _msg "--> Checking current commit"
 
     if [[ "$saved_commit" == "$head_commit" ]] ; then
         _msg "--> The saved commit is the current commit on HEAD ($REPO_VERSION); no need to update the repository"
@@ -204,7 +191,7 @@ update_ansible()
     _run export PATH="${PATH}:${AnsibleVenvDir}/bin"
 }
 
-run_ansible_playbooks()
+run_ansible()
 {
     local -r inventory_file="inventories/${ENVIRONMENT}/${SERVICE}.aws_ec2.yml"
     local -r playbook_file="playbooks/role-${ROLE}.yml"
@@ -213,20 +200,9 @@ run_ansible_playbooks()
 
     local -r instance_ip="$( _run curl -m 1 --retry 2 -fsSL http://169.254.169.254/latest/meta-data/local-ipv4 )"
 
-    _msg "--> Parsing defined extra vars"
-
-    local extra_vars=()
-
-    mapfile -t extra_vars < <( tr ',' '\n' <<< "$EXTRA_VARS" )
-
     _msg "--> Setting Ansible command options"
 
-    local ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$instance_ip" )
-    local var
-
-    for var in "${extra_vars[@]}" ; do
-        ansible_opts+=( -e "$var" )
-    done
+    local -r ansible_opts=( --connection "local" --inventory "$inventory_file" --limit "$instance_ip" )
 
     _run pushd "$RepoDir"
 
@@ -237,7 +213,7 @@ run_ansible_playbooks()
     # Output Ansible version to help on troubleshooting
     _run ansible --version
 
-    if _is_user_data ; then
+    if [[ "$1" == "--init" ]] ; then
         _msg "--> Running initialization playbooks"
 
         _run_with_retry ansible-playbook playbooks/init-ansible-venv.yml --verbose "${ansible_opts[@]}"
@@ -254,9 +230,6 @@ run_ansible_playbooks()
 
 save_config()
 {
-    # Only required in user data mode
-    _is_user_data || return 0
-
     _msg "--> Saving config file"
 
     cat <<EOF > "$ConfigFile"
@@ -270,17 +243,33 @@ main()
 {
     _msg "Starting ${ProgramName} v${ProgramVersion} at $( date --utc )"
 
-    [[ "$1" == "--user-data" ]] && USER_DATA_MODE="1"
+    case $1 in
+        --user-data)
+            _msg "--> Note: running in user data mode"
 
-    _is_user_data && _msg "--> Note: running in user data mode"
+            check_required_vars
+            save_config
+            install_system_deps
+            update_playbooks_repo
+            update_ansible
+            run_ansible --init
+        ;;
 
-    load_config
-    check_required_vars
-    install_system_deps
-    update_playbooks_repo
-    update_ansible
-    run_ansible_playbooks
-    save_config
+        --cron)
+            _msg "--> Note: running in cron mode"
+
+            load_config
+            check_required_vars
+            update_playbooks_repo
+            update_ansible
+            run_ansible
+        ;;
+
+        *)
+            _msg "Usage: $ProgramName <--user-data|--cron>"
+            exit 2
+        ;;
+    esac
 
     _msg "Program finished at $( date --utc )"
 }
