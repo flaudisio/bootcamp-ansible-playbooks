@@ -266,7 +266,7 @@ main()
         ;;
 
         *)
-            _msg "Usage: $ProgramName <cron|user-data>"
+            _msg "Usage: $ProgramName <--user-data|--cron>"
             exit 2
         ;;
     esac
