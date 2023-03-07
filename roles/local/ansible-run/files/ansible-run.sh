@@ -164,10 +164,10 @@ update_playbooks_repo()
 
     _run git -C "$RepoDir" fetch --all --prune --quiet
 
+    _msg "--> Checking current commit"
+
     saved_commit="$( cat "$status_file" 2> /dev/null )"
     head_commit="$( git -C "$RepoDir" rev-parse "$remote_branch" 2> /dev/null )"
-
-    _msg "--> Checking current commit"
 
     if [[ "$saved_commit" == "$head_commit" ]] ; then
         _msg "--> The saved commit is the current commit on HEAD ($REPO_VERSION); no need to update the repository"
