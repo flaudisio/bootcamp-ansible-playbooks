@@ -100,6 +100,22 @@ generate_config_file()
     gosu "$SEMAPHORE_USER" sh -c "envsubst < /etc/config.json.tpl > '$SemaphoreConfigFile'"
 }
 
+configure_admin_user()
+{
+    local user_cmd="add"
+
+    if semaphore --config "$SemaphoreConfigFile" user list | grep -q "^${SEMAPHORE_ADMIN}\$" ; then
+        user_cmd="change-by-login"
+    fi
+
+    semaphore --config "$SemaphoreConfigFile" user "$user_cmd" \
+        --admin \
+        --login "$SEMAPHORE_ADMIN" \
+        --name "$SEMAPHORE_ADMIN_NAME" \
+        --email "$SEMAPHORE_ADMIN_EMAIL" \
+        --password "$SEMAPHORE_ADMIN_PASSWORD"
+}
+
 
 case $1 in
     semaphore)
@@ -110,6 +126,9 @@ case $1 in
         if [ "$2" = "server" ] ; then
             msg "[INFO] Running migrations"
             gosu "$SEMAPHORE_USER" semaphore migrate --config "${SEMAPHORE_CONFIG_PATH}/config.json"
+
+            msg "[INFO] Configuring admin user"
+            configure_admin_user
 
             msg "[INFO] Running Semaphore server"
             exec gosu "$SEMAPHORE_USER" semaphore server --config "${SEMAPHORE_CONFIG_PATH}/config.json"
