@@ -7,6 +7,8 @@ semaphore_postgres_db_name: /semaphore-server/db-name
 semaphore_postgres_db_user: /semaphore-server/db-user
 semaphore_postgres_db_pass: /semaphore-server/db-pass
 
+semaphore_cookie_hash: /semaphore-server/cookie-hash
+semaphore_cookie_encryption: /semaphore-server/cookie-encryption
 semaphore_access_key_encryption: /semaphore-server/access-key-encryption
 
 semaphore_admin_username: /semaphore-server/admin-username
