@@ -9,6 +9,8 @@ x-credentials:
   - &db_name {{ lookup('amazon.aws.aws_ssm', semaphore_postgres_db_name, region=semaphore_credentials_ssm_region) }}
   - &db_user {{ lookup('amazon.aws.aws_ssm', semaphore_postgres_db_user, region=semaphore_credentials_ssm_region) }}
   - &db_pass {{ lookup('amazon.aws.aws_ssm', semaphore_postgres_db_pass, region=semaphore_credentials_ssm_region) }}
+  - &cookie_hash {{ lookup('amazon.aws.aws_ssm', semaphore_cookie_hash, region=semaphore_credentials_ssm_region) }}
+  - &cookie_encryption {{ lookup('amazon.aws.aws_ssm', semaphore_cookie_encryption, region=semaphore_credentials_ssm_region) }}
   - &access_key_encryption {{ lookup('amazon.aws.aws_ssm', semaphore_access_key_encryption, region=semaphore_credentials_ssm_region) }}
   - &admin_user {{ lookup('amazon.aws.aws_ssm', semaphore_admin_username, region=semaphore_credentials_ssm_region) }}
   - &admin_pass {{ lookup('amazon.aws.aws_ssm', semaphore_admin_password, region=semaphore_credentials_ssm_region) }}
@@ -16,6 +18,8 @@ x-credentials:
   - &db_name {{ semaphore_postgres_db_name }}
   - &db_user {{ semaphore_postgres_db_user }}
   - &db_pass {{ semaphore_postgres_db_pass }}
+  - &cookie_hash {{ semaphore_cookie_hash }}
+  - &cookie_encryption {{ semaphore_cookie_encryption }}
   - &access_key_encryption {{ semaphore_access_key_encryption }}
   - &admin_user {{ semaphore_admin_username }}
   - &admin_pass {{ semaphore_admin_password }}
@@ -29,22 +33,25 @@ services:
     ports:
       - {{ semaphore_port }}:3000
     volumes:
-      - {{ semaphore_volume_base_dir }}/semaphore-etc:/etc/semaphore
-      - {{ semaphore_volume_base_dir }}/semaphore-tmp:/tmp/semaphore
+      - {{ semaphore_volume_base_dir }}/semaphore-etc:/semaphore/etc
+      - {{ semaphore_volume_base_dir }}/semaphore-tmp:/semaphore/tmp
     environment:
       SEMAPHORE_DB_DIALECT: postgres
       SEMAPHORE_DB_HOST: *db_host
-      SEMAPHORE_DB_PORT: {{ semaphore_postgres_db_port }}
+      SEMAPHORE_DB_PORT: "{{ semaphore_postgres_db_port }}"
       SEMAPHORE_DB: *db_name
       SEMAPHORE_DB_USER: *db_user
       SEMAPHORE_DB_PASS: *db_pass
+      SEMAPHORE_COOKIE_HASH: *cookie_hash
+      SEMAPHORE_COOKIE_ENCRYPTION: *cookie_encryption
       SEMAPHORE_ACCESS_KEY_ENCRYPTION: *access_key_encryption
       SEMAPHORE_ADMIN: *admin_user
       SEMAPHORE_ADMIN_PASSWORD: *admin_pass
-      SEMAPHORE_ADMIN_NAME: {{ semaphore_admin_name }}
-      SEMAPHORE_ADMIN_EMAIL: {{ semaphore_admin_email }}
-      SEMAPHORE_TMP_PATH: /tmp/semaphore
-      SEMAPHORE_WEB_ROOT: {{ semaphore_web_root }}
+      SEMAPHORE_ADMIN_NAME: "{{ semaphore_admin_name }}"
+      SEMAPHORE_ADMIN_EMAIL: "{{ semaphore_admin_email }}"
+      SEMAPHORE_WEB_ROOT: "{{ semaphore_web_root }}"
+      SEMAPHORE_CONCURRENCY_MODE: "{{ semaphore_concurrency_mode }}"
+      SEMAPHORE_MAX_PARALLEL_TASKS: "{{ semaphore_max_parallel_tasks }}"
 
   {% if semaphore_postgres_s3_backup_enabled | bool %}
   postgres-s3-backup:
