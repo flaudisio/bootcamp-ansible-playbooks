@@ -2,6 +2,7 @@ FROM python:3.10-alpine
 
 # Dependencies
 
+# hadolint ignore=DL3018
 RUN set -ex \
  && apk add --no-cache \
         ca-certificates \
@@ -27,6 +28,7 @@ RUN set -ex \
 
 ARG semaphore_version=2.8.77
 
+# hadolint ignore=DL3018,DL4006
 RUN set -ex \
  && curl -sSL \
         "https://github.com/ansible-semaphore/semaphore/releases/download/v${semaphore_version}/semaphore_${semaphore_version}_linux_amd64.tar.gz" \
@@ -43,6 +45,7 @@ RUN set -ex \
 
 COPY _requirements/control-nodes.txt /tmp/requirements.txt
 
+# hadolint ignore=DL3018
 RUN set -ex \
  && apk add --no-cache --virtual .build-deps \
         gcc \
