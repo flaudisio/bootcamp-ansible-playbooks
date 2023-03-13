@@ -75,4 +75,4 @@ VOLUME ["$SEMAPHORE_TMP_PATH"]
 
 ENTRYPOINT ["tini", "--", "/sbin/entrypoint.sh"]
 
-CMD ["semaphore", "server", "--config", "$SEMAPHORE_CONFIG_PATH"]
+CMD ["semaphore", "server", "--config", "${SEMAPHORE_CONFIG_PATH}/config.json"]
