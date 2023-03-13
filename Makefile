@@ -5,9 +5,6 @@ VENV_DIR ?= $(HOME)/.virtualenvs/bootcamp-ansible-playbooks
 
 export PATH := $(VENV_DIR)/bin:$(PATH)
 
-SEMAPHORE_IMAGE_REPO ?= flaudisio/bootcamp-semaphore
-SEMAPHORE_IMAGE_TAG ?= latest
-
 .PHONY: help
 help:  ## Show available commands
 	@echo "Available commands:"
@@ -56,10 +53,6 @@ uninstall:  ## Remove the Ansible virtualenv
 	rm -rf '$(VENV_DIR)'
 	git clean -fdx -- '$(COLLECTIONS_PATH)' '$(ROLES_PATH)'
 
-.PHONY: build-semaphore-image
-build-semaphore-image:  ## Build Semaphore Docker image (optional: ARGS)
-	docker image build --pull --tag $(SEMAPHORE_IMAGE_REPO):$(SEMAPHORE_IMAGE_TAG) -f _docker/semaphore/Dockerfile . $(ARGS)
-
-.PHONY: push-semaphore-image
-push-semaphore-image:  ## Push Semaphore image to Docker Hub
-	docker image push $(SEMAPHORE_IMAGE_REPO):$(SEMAPHORE_IMAGE_TAG)
+.PHONY: build-semaphore-images
+build-semaphore-images:  ## Build and push Semaphore Docker images
+	SEMAPHORE_IMAGE_REPO="flaudisio/bootcamp-semaphore" _scripts/build-semaphore-images.py

@@ -7,6 +7,8 @@ semaphore_postgres_db_name: /semaphore-server/db-name
 semaphore_postgres_db_user: /semaphore-server/db-user
 semaphore_postgres_db_pass: /semaphore-server/db-pass
 
+semaphore_cookie_hash: /semaphore-server/cookie-hash
+semaphore_cookie_encryption: /semaphore-server/cookie-encryption
 semaphore_access_key_encryption: /semaphore-server/access-key-encryption
 
 semaphore_admin_username: /semaphore-server/admin-username
@@ -14,7 +16,7 @@ semaphore_admin_password: /semaphore-server/admin-password
 
 semaphore_admin_name: Semaphore Admin
 semaphore_admin_email: flaudisio+semaphore-admin@gmail.com
-semaphore_web_root: https://semaphore.dev.bootcamp.flaudisio.com
+semaphore_web_root: https://semaphore-server.dev.bootcamp.flaudisio.com
 
 semaphore_postgres_s3_backup_enabled: true
 semaphore_postgres_s3_backup_schedule: "0 5 * * * *"
