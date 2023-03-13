@@ -16,7 +16,7 @@ semaphore_admin_password: /semaphore-server/admin-password
 
 semaphore_admin_name: Semaphore Admin
 semaphore_admin_email: flaudisio+semaphore-admin@gmail.com
-semaphore_web_root: https://semaphore.dev.bootcamp.flaudisio.com
+semaphore_web_root: https://semaphore-server.dev.bootcamp.flaudisio.com
 
 semaphore_postgres_s3_backup_enabled: true
 semaphore_postgres_s3_backup_schedule: "0 5 * * * *"
