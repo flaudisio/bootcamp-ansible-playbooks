@@ -2,6 +2,9 @@ FROM python:3.10-alpine
 
 # Dependencies
 
+ARG gosu_version=1.16
+ARG tini_version=0.19.0
+
 # hadolint ignore=DL3018
 RUN set -ex \
  && apk add --no-cache \
@@ -13,8 +16,10 @@ RUN set -ex \
         mariadb-client \
         openssh-client-default \
         sshpass \
- && curl -L -o /sbin/gosu "https://github.com/tianon/gosu/releases/download/1.16/gosu-amd64" \
- && curl -L -o /sbin/tini "https://github.com/krallin/tini/releases/download/v0.19.0/tini-static-amd64" \
+ && DL_ARCH=amd64 \
+ && if [ "$( arch )" = "aarch64" ] ; then DL_ARCH=arm64 ; fi \
+ && curl -L -o /sbin/gosu "https://github.com/tianon/gosu/releases/download/${gosu_version}/gosu-${DL_ARCH}" \
+ && curl -L -o /sbin/tini "https://github.com/krallin/tini/releases/download/v${tini_version}/tini-static-${DL_ARCH}" \
  && chmod -v 755 /sbin/gosu /sbin/tini
 
 # Semaphore
@@ -32,8 +37,10 @@ ARG semaphore_version=2.8.77
 
 # hadolint ignore=DL3018,DL4006
 RUN set -ex \
+ && DL_ARCH=amd64 \
+ && if [ "$( arch )" = "aarch64" ] ; then DL_ARCH=arm64 ; fi \
  && curl -sSL \
-        "https://github.com/ansible-semaphore/semaphore/releases/download/v${semaphore_version}/semaphore_${semaphore_version}_linux_amd64.tar.gz" \
+        "https://github.com/ansible-semaphore/semaphore/releases/download/v${semaphore_version}/semaphore_${semaphore_version}_linux_${DL_ARCH}.tar.gz" \
         | tar -xvz -f - semaphore \
  && mv -v semaphore /usr/local/bin/semaphore \
  && chown -v root:root /usr/local/bin/semaphore \
