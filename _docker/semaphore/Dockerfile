@@ -61,8 +61,6 @@ RUN set -ex \
  && pip install --no-cache-dir -r /tmp/requirements.txt \
  && apk del --no-cache --purge .build-deps \
     \
- && ansible --version \
-    \
  && find /usr/local -depth -type d -name '__pycache__' -exec rm -rf '{}' \; \
  && rm -rf ~/.cache
 
