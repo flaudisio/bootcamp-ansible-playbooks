@@ -9,6 +9,8 @@
 set -e
 set -o pipefail
 
+SemaphoreConfigFile="$SEMAPHORE_CONFIG_PATH/config.json"
+
 : "${SSH_LOG_LEVEL:="ERROR"}"
 
 
@@ -32,10 +34,10 @@ fix_directory_permissions()
         fi
 
         # Try to create/modify a file using the Semaphore user
-        if ! gosu semaphore touch "${data_dir}/.docker-entrypoint-probe" 2> /dev/null ; then
+        if ! gosu "$SEMAPHORE_USER" touch "${data_dir}/.docker-entrypoint-probe" 2> /dev/null ; then
             msg "[INFO] Fixing permissions for $data_dir"
 
-            if ! chown -R semaphore "$data_dir" ; then
+            if ! chown -R "$SEMAPHORE_USER" "$data_dir" ; then
                 msg "[ERROR] Could not fix $data_dir permissions; please check your environment. Aborting Docker entrypoint" >&2
                 exit 1
             fi
@@ -52,19 +54,68 @@ configure_ssh_client()
     fi
 }
 
+generate_config_file()
+{
+    msg "[INFO] Setting default config values"
+
+    export SEMAPHORE_WEB_ROOT="${SEMAPHORE_WEB_ROOT:-"http://localhost:3000"}"
+    export SEMAPHORE_PORT="${SEMAPHORE_PORT:-""}"
+    export SEMAPHORE_INTERFACE="${SEMAPHORE_INTERFACE:-""}"
+
+    export SEMAPHORE_EMAIL_ALERT="${SEMAPHORE_EMAIL_ALERT:-"false"}"
+    export SEMAPHORE_EMAIL_SECURE="${SEMAPHORE_EMAIL_SECURE:-"false"}"
+    export SEMAPHORE_EMAIL_SENDER="${SEMAPHORE_EMAIL_SENDER:-""}"
+    export SEMAPHORE_EMAIL_HOST="${SEMAPHORE_EMAIL_HOST:-""}"
+    export SEMAPHORE_EMAIL_PORT="${SEMAPHORE_EMAIL_PORT:-""}"
+    export SEMAPHORE_EMAIL_USERNAME="${SEMAPHORE_EMAIL_USERNAME:-""}"
+    export SEMAPHORE_EMAIL_PASSWORD="${SEMAPHORE_EMAIL_PASSWORD:-""}"
+
+    export SEMAPHORE_LDAP_ENABLE="${SEMAPHORE_LDAP_ENABLE:-"false"}"
+    export SEMAPHORE_LDAP_NEEDTLS="${SEMAPHORE_LDAP_NEEDTLS:-"false"}"
+    export SEMAPHORE_LDAP_BINDDN="${SEMAPHORE_LDAP_BINDDN:-""}"
+    export SEMAPHORE_LDAP_BINDPASSWORD="${SEMAPHORE_LDAP_BINDPASSWORD:-""}"
+    export SEMAPHORE_LDAP_SERVER="${SEMAPHORE_LDAP_SERVER:-""}"
+    export SEMAPHORE_LDAP_SEARCHDN="${SEMAPHORE_LDAP_SEARCHDN:-""}"
+    export SEMAPHORE_LDAP_SEARCHFILTER="${SEMAPHORE_LDAP_SEARCHFILTER:-""}"
+    export SEMAPHORE_LDAP_DN="${SEMAPHORE_LDAP_DN:-""}"
+    export SEMAPHORE_LDAP_MAIL="${SEMAPHORE_LDAP_MAIL:-""}"
+    export SEMAPHORE_LDAP_UID="${SEMAPHORE_LDAP_UID:-""}"
+    export SEMAPHORE_LDAP_CN="${SEMAPHORE_LDAP_CN:-""}"
+
+    export SEMAPHORE_TELEGRAM_ALERT="${SEMAPHORE_TELEGRAM_ALERT:-"false"}"
+    export SEMAPHORE_TELEGRAM_CHAT="${SEMAPHORE_TELEGRAM_CHAT:-""}"
+    export SEMAPHORE_TELEGRAM_TOKEN="${SEMAPHORE_TELEGRAM_TOKEN:-""}"
+
+    export SEMAPHORE_SLACK_ALERT="${SEMAPHORE_SLACK_ALERT:-"false"}"
+    export SEMAPHORE_SLACK_URL="${SEMAPHORE_SLACK_URL:-""}"
+
+    export SEMAPHORE_CONCURRENCY_MODE="${SEMAPHORE_CONCURRENCY_MODE:-""}"
+    export SEMAPHORE_MAX_PARALLEL_TASKS="${SEMAPHORE_MAX_PARALLEL_TASKS:-"0"}"
+
+    export SEMAPHORE_SSH_CONFIG_PATH="${SEMAPHORE_SSH_CONFIG_PATH:-""}"
+    export SEMAPHORE_DEMO_MODE="${SEMAPHORE_DEMO_MODE:-"false"}"
+
+    msg "[INFO] Generating config file"
+
+    gosu "$SEMAPHORE_USER" sh -c "envsubst < /etc/config.json.tpl > '$SemaphoreConfigFile'"
+}
+
 
 case $1 in
     semaphore)
         fix_directory_permissions
         configure_ssh_client
-
-        msg "[INFO] Running Semaphore"
+        generate_config_file
 
         if [ "$2" = "server" ] ; then
-            exec gosu semaphore semaphore-wrapper semaphore server --config "${SEMAPHORE_CONFIG_PATH}/config.json"
+            msg "[INFO] Running migrations"
+            gosu "$SEMAPHORE_USER" semaphore migrate --config "${SEMAPHORE_CONFIG_PATH}/config.json"
+
+            msg "[INFO] Running Semaphore server"
+            exec gosu "$SEMAPHORE_USER" semaphore server --config "${SEMAPHORE_CONFIG_PATH}/config.json"
         fi
 
-        exec gosu semaphore "$@"
+        exec gosu "$SEMAPHORE_USER" "$@"
     ;;
 esac
 

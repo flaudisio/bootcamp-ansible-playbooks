@@ -8,6 +8,7 @@ RUN set -ex \
         ca-certificates \
         curl \
         gcompat \
+        gettext \
         git \
         mariadb-client \
         openssh-client-default \
@@ -18,13 +19,14 @@ RUN set -ex \
 
 # Semaphore
 
-ENV SEMAPHORE_TMP_PATH=/tmp/semaphore \
-    SEMAPHORE_CONFIG_PATH=/etc/semaphore \
-    SEMAPHORE_DB_PATH=/data/semaphore
+ENV SEMAPHORE_USER=semaphore \
+    SEMAPHORE_TMP_PATH=/semaphore/tmp \
+    SEMAPHORE_CONFIG_PATH=/semaphore/etc \
+    SEMAPHORE_DB_PATH=/semaphore/db
 
 RUN set -ex \
- && addgroup -g 786 semaphore \
- && adduser -h /home/semaphore -D -u 786 -G semaphore semaphore
+ && addgroup -g 786 "$SEMAPHORE_USER" \
+ && adduser -h "/home/$SEMAPHORE_USER" -D -u 786 -G "$SEMAPHORE_USER" "$SEMAPHORE_USER"
 
 ARG semaphore_version=2.8.77
 
@@ -35,11 +37,7 @@ RUN set -ex \
         | tar -xvz -f - semaphore \
  && mv -v semaphore /usr/local/bin/semaphore \
  && chown -v root:root /usr/local/bin/semaphore \
- && chmod -v 755 /usr/local/bin/semaphore \
- && curl -sSL -o /usr/local/bin/semaphore-wrapper \
-        "https://raw.githubusercontent.com/ansible-semaphore/semaphore/v${semaphore_version}/deployment/docker/common/semaphore-wrapper" \
- && chown -v root:root /usr/local/bin/semaphore-wrapper \
- && chmod -v 755 /usr/local/bin/semaphore-wrapper
+ && chmod -v 755 /usr/local/bin/semaphore
 
 # Ansible
 
@@ -62,6 +60,9 @@ RUN set -ex \
  && rm -rf ~/.cache
 
 # Image setup
+
+# Ref: https://docs.ansible-semaphore.com/administration-guide/configuration#configuration-file
+COPY _docker/semaphore/config.json.tpl /etc/config.json.tpl
 
 COPY _docker/semaphore/entrypoint.sh /sbin/entrypoint.sh
 
