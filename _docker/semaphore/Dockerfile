@@ -8,6 +8,7 @@ ARG tini_version=0.19.0
 # hadolint ignore=DL3018
 RUN set -ex \
  && apk add --no-cache \
+        bash \
         ca-certificates \
         curl \
         gcompat \

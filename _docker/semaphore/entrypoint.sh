@@ -1,10 +1,4 @@
-#!/bin/sh
-#
-# docker-entrypoint.sh
-#
-##
-
-# shellcheck shell=dash
+#!/usr/bin/env bash
 
 set -e
 set -o pipefail
@@ -16,7 +10,7 @@ SemaphoreConfigFile="$SEMAPHORE_CONFIG_PATH/config.json"
 
 msg()
 {
-    echo "[entrypoint] $*"
+    echo "[entrypoint] $*" >&2
 }
 
 fix_directory_permissions()
@@ -123,7 +117,7 @@ case $1 in
         configure_ssh_client
         generate_config_file
 
-        if [ "$2" = "server" ] ; then
+        if [[ "$2" == "server" ]] ; then
             msg "[INFO] Running migrations"
             gosu "$SEMAPHORE_USER" semaphore migrate --config "${SEMAPHORE_CONFIG_PATH}/config.json"
 
