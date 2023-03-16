@@ -55,4 +55,8 @@ uninstall:  ## Remove the Ansible virtualenv
 
 .PHONY: build-semaphore-images
 build-semaphore-images:  ## Build and push Semaphore Docker images
-	SEMAPHORE_IMAGE_REPO="flaudisio/bootcamp-semaphore" _scripts/build-semaphore-images.py
+	SEMAPHORE_IMAGE_REPO="flaudisio/bootcamp-semaphore" _scripts/build-images.py semaphore
+
+.PHONY: build-housekeeper-images
+build-housekeeper-images:  ## Build and push Semaphore Housekeeper Docker images
+	HOUSEKEEPER_IMAGE_REPO="flaudisio/bootcamp-semaphore-housekeeper" _scripts/build-images.py housekeeper
