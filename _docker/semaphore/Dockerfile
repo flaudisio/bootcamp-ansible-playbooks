@@ -56,12 +56,9 @@ RUN set -ex \
  && apk add --no-cache --virtual .build-deps \
         gcc \
         libffi-dev \
-        make \
         musl-dev \
-        openssl-dev \
  && pip install --no-cache-dir -r /tmp/requirements.txt \
  && apk del --no-cache --purge .build-deps \
-    \
  && find /usr/local -depth -type d -name '__pycache__' -exec rm -rf '{}' \; \
  && rm -rf ~/.cache
 
