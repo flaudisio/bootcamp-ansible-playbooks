@@ -19,8 +19,8 @@ RUN set -ex \
         sshpass \
  && DL_ARCH=amd64 \
  && if [ "$( arch )" = "aarch64" ] ; then DL_ARCH=arm64 ; fi \
- && curl -L -o /sbin/gosu "https://github.com/tianon/gosu/releases/download/${gosu_version}/gosu-${DL_ARCH}" \
- && curl -L -o /sbin/tini "https://github.com/krallin/tini/releases/download/v${tini_version}/tini-static-${DL_ARCH}" \
+ && curl -fL -o /sbin/gosu "https://github.com/tianon/gosu/releases/download/${gosu_version}/gosu-${DL_ARCH}" \
+ && curl -fL -o /sbin/tini "https://github.com/krallin/tini/releases/download/v${tini_version}/tini-static-${DL_ARCH}" \
  && chmod -v 755 /sbin/gosu /sbin/tini
 
 # Semaphore
