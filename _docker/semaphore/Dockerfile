@@ -32,7 +32,7 @@ ENV SEMAPHORE_USER=semaphore \
 
 RUN set -ex \
  && addgroup -g 786 "$SEMAPHORE_USER" \
- && adduser -h "/home/$SEMAPHORE_USER" -D -u 786 -G "$SEMAPHORE_USER" "$SEMAPHORE_USER"
+ && adduser -D -u 786 -G "$SEMAPHORE_USER" "$SEMAPHORE_USER"
 
 ARG semaphore_version
 
