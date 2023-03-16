@@ -40,9 +40,10 @@ ARG semaphore_version
 RUN set -ex \
  && DL_ARCH=amd64 \
  && if [ "$( arch )" = "aarch64" ] ; then DL_ARCH=arm64 ; fi \
- && curl -sSL \
+ && curl -fL -o semaphore.tar.gz \
         "https://github.com/ansible-semaphore/semaphore/releases/download/v${semaphore_version}/semaphore_${semaphore_version}_linux_${DL_ARCH}.tar.gz" \
-        | tar -xvz -f - semaphore \
+ && tar -xvz -f semaphore.tar.gz semaphore \
+ && rm -f semaphore.tar.gz \
  && mv -v semaphore /usr/local/bin/semaphore \
  && chown -v root:root /usr/local/bin/semaphore \
  && chmod -v 755 /usr/local/bin/semaphore

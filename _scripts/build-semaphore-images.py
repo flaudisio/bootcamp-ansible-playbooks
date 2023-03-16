@@ -14,34 +14,46 @@ SEMAPHORE_IMAGE_DIR = "_docker/semaphore"
 SEMAPHORE_IMAGE_REPO = os.getenv("SEMAPHORE_IMAGE_REPO", "example/semaphore")
 
 SEMAPHORE_IMAGE_TAGS = {
-    "2.8.77": {
-        "semaphore_version": "2.8.77"
+    "2.8.89-alpine": {
+        "dockerfile": "Dockerfile.alpine",
+        "args": [
+            "semaphore_version=2.8.89",
+        ]
     },
-    "2.8.89": {
-        "semaphore_version": "2.8.89",
+    "2.8.89-debian": {
+        "dockerfile": "Dockerfile.debian",
+        "args": [
+            "semaphore_version=2.8.89",
+        ]
     },
 }
+
+BUILD_PLATFORMS = [
+    "linux/amd64",
+    "linux/arm64",
+]
 
 
 def msg(message: str) -> None:
     print(f"--> {message}", file=sys.stderr)
 
 
-def build_image(image_tag: str, build_args: dict) -> None:
+def build_image(image_tag: str, spec: dict) -> None:
     msg(f"Building image {image_tag}")
+
+    dockerfile = spec.get("dockerfile", "Dockerfile")
 
     cmd = [
         "docker", "buildx", "build",
-        "--platform", "linux/amd64,linux/arm64",
+        "--platform", ",".join(BUILD_PLATFORMS),
         "--pull",
         "--tag", image_tag,
-        "-f", f"{SEMAPHORE_IMAGE_DIR}/Dockerfile",
+        "-f", f"{SEMAPHORE_IMAGE_DIR}/{dockerfile}",
         "--push",
         "."
     ]
 
-    for k, v in build_args.items():
-        cmd.extend(["--build-arg", f"{k}={v}"])
+    [cmd.extend(["--build-arg", arg]) for arg in spec.get("args", [])]
 
     msg("Running: {}".format(" ".join(cmd)))
     msg(f"cwd: {REPO_DIR}")
@@ -50,8 +62,8 @@ def build_image(image_tag: str, build_args: dict) -> None:
 
 
 def build_images() -> None:
-    for tag, args in SEMAPHORE_IMAGE_TAGS.items():
-        build_image(f"{SEMAPHORE_IMAGE_REPO}:{tag}", args)
+    for tag, spec in SEMAPHORE_IMAGE_TAGS.items():
+        build_image(f"{SEMAPHORE_IMAGE_REPO}:{tag}", spec)
 
 
 def main() -> int:
