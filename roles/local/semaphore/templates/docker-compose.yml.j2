@@ -4,7 +4,7 @@
 version: "2.4"
 
 x-credentials:
-  - &db_host {{ semaphore_postgres_db_host }}
+  - &db_host {{ semaphore_postgres_db_host }}:{{ semaphore_postgres_db_port }}
   {% if semaphore_credentials_ssm_enabled | bool %}
   - &db_name {{ lookup('amazon.aws.aws_ssm', semaphore_postgres_db_name, region=semaphore_credentials_ssm_region) }}
   - &db_user {{ lookup('amazon.aws.aws_ssm', semaphore_postgres_db_user, region=semaphore_credentials_ssm_region) }}
@@ -38,7 +38,6 @@ services:
     environment:
       SEMAPHORE_DB_DIALECT: postgres
       SEMAPHORE_DB_HOST: *db_host
-      SEMAPHORE_DB_PORT: "{{ semaphore_postgres_db_port }}"
       SEMAPHORE_DB: *db_name
       SEMAPHORE_DB_USER: *db_user
       SEMAPHORE_DB_PASS: *db_pass
