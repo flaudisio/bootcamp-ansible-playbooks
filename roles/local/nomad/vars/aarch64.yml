@@ -1,0 +1,7 @@
+---
+nomad_dl_url: >-
+  https://releases.hashicorp.com/nomad/{{ nomad_version }}/nomad_{{ nomad_version }}_linux_arm64.zip
+
+# yamllint disable rule:line-length
+nomad_cni_plugins_dl_url: >-
+  https://github.com/containernetworking/plugins/releases/download/v{{ nomad_cni_plugins_version }}/cni-plugins-linux-arm64-v{{ nomad_cni_plugins_version }}.tgz

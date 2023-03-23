@@ -1,0 +1,32 @@
+#jinja2:lstrip_blocks: True
+# {{ ansible_managed }}
+
+[Unit]
+Description=Nomad
+Documentation=https://www.nomadproject.io/docs/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+{% if nomad_node_type == "server" %}
+User={{ nomad_user }}
+Group={{ nomad_user }}
+{% else %}
+User=root
+Group=root
+{% endif %}
+
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart={{ nomad_bin_path }} agent -config {{ nomad_config_dir }}
+KillMode=process
+KillSignal=SIGINT
+LimitNOFILE=65536
+LimitNPROC=infinity
+Restart=on-failure
+RestartSec=2
+
+TasksMax=infinity
+OOMScoreAdjust=-1000
+
+[Install]
+WantedBy=multi-user.target

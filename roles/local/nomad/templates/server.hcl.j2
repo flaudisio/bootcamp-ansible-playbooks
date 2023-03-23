@@ -1,0 +1,23 @@
+#jinja2:lstrip_blocks: True
+# {{ ansible_managed }}
+
+server {
+  enabled = true
+
+  bootstrap_expect = {{ nomad_server_bootstrap_expect }}
+
+  server_join {
+    retry_join = [
+      {% for host in nomad_server_join_hosts %}
+      "{{ host }}",
+      {% endfor %}
+    ]
+
+    retry_max      = {{ nomad_server_join_retry_max }}
+    retry_interval = "{{ nomad_server_join_retry_interval }}"
+  }
+}
+
+ui {
+  enabled = {{ nomad_ui_enabled | bool | string | lower }}
+}

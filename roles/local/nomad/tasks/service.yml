@@ -1,0 +1,17 @@
+---
+- name: Create service file
+  ansible.builtin.template:
+    src: nomad.service.j2
+    dest: "{{ nomad_service_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Reload Nomad daemon
+    - Restart Nomad
+
+- name: Ensure service is running
+  ansible.builtin.service:
+    name: nomad
+    state: started
+    enabled: true
