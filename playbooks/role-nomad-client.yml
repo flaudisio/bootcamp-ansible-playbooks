@@ -1,0 +1,11 @@
+---
+- name: Deploy Nomad clients
+  hosts: all
+
+  roles:
+    - role: base
+      tags: [base]
+    - role: docker
+      tags: [docker]
+    - role: nomad
+      tags: [nomad]

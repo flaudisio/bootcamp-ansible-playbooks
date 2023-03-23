@@ -1,0 +1,9 @@
+---
+- name: Deploy Nomad servers
+  hosts: all
+
+  roles:
+    - role: base
+      tags: [base]
+    - role: nomad
+      tags: [nomad]
