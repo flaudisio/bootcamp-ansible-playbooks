@@ -1,0 +1,44 @@
+---
+- name: Check if CNI plugins are installed
+  ansible.builtin.stat:
+    path: "{{ nomad_cni_plugins_dl_bin_dir }}"
+  register: _nomad_cni_dir
+
+- name: Ensure CNI plugins directory exists
+  ansible.builtin.file:
+    path: "{{ nomad_cni_plugins_dl_bin_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when: not _nomad_cni_dir.stat.exists
+
+- name: Download CNI plugins
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: "{{ nomad_cni_plugins_dl_url }}"
+    dest: "{{ nomad_cni_plugins_dl_bin_dir }}"
+    owner: root
+    group: root
+  when: not _nomad_cni_dir.stat.exists
+
+- name: Ensure CNI plugins directory symlink exists
+  ansible.builtin.file:
+    src: "{{ nomad_cni_plugins_dl_base_dir }}"
+    path: "{{ nomad_cni_plugins_current_dir }}"
+    state: link
+    owner: root
+    group: root
+  notify: Restart Nomad
+
+- name: Configure sysctl parameters
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: "1"
+    state: present
+    sysctl_file: /etc/sysctl.d/90-nomad-cni-plugins.conf
+    reload: true
+  loop:
+    - net.bridge.bridge-nf-call-arptables
+    - net.bridge.bridge-nf-call-ip6tables
+    - net.bridge.bridge-nf-call-iptables

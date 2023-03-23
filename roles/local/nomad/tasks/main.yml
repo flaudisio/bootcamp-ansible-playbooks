@@ -1,0 +1,76 @@
+---
+- name: Include architecture-specific variables
+  ansible.builtin.include_vars:
+    file: "{{ ansible_architecture }}.yml"
+  tags: nomad:install
+
+- name: Check if Nomad {{ nomad_version }} is installed
+  ansible.builtin.shell: nomad version || true
+  register: _nomad_check
+  changed_when: false
+  tags: nomad:install
+
+- name: Install binary
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: "{{ nomad_dl_url }}"
+    dest: "{{ nomad_bin_path | dirname }}"
+    owner: root
+    group: root
+    mode: 0755
+  when: >
+    _nomad_check.stdout_lines | length == 0
+    or nomad_version not in _nomad_check.stdout_lines[0]
+  tags: nomad:install
+
+- name: Define nomad_user var according to the node type
+  ansible.builtin.set_fact:
+    _nomad_user: "{{ (nomad_node_type == 'server') | ternary(nomad_user, 'root') }}"
+  tags: nomad:config
+
+- name: Ensure config directory exists
+  ansible.builtin.file:
+    path: "{{ nomad_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  tags: nomad:config
+
+- name: Include server tasks
+  ansible.builtin.import_tasks: server.yml
+  when: nomad_node_type == "server"
+  tags: nomad:config
+
+- name: Include client tasks
+  ansible.builtin.import_tasks: client.yml
+  when: nomad_node_type == "client"
+  tags: nomad:config
+
+- name: Ensure data directory exists
+  ansible.builtin.file:
+    path: "{{ nomad_data_dir }}"
+    state: directory
+    owner: "{{ _nomad_user }}"
+    group: "{{ _nomad_user }}"
+    mode: 0700
+  tags: nomad:config
+
+- name: Create common config file
+  ansible.builtin.template:
+    src: common.hcl.j2
+    dest: "{{ nomad_common_config_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart Nomad
+  tags: nomad:config
+
+- name: Include service-related tasks
+  ansible.builtin.import_tasks: service.yml
+  tags: nomad:config
+
+- name: Include CNI-related tasks
+  ansible.builtin.import_tasks: cni.yml
+  when: nomad_install_cni_plugins | bool
+  tags: nomad:cni

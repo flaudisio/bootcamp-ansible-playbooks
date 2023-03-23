@@ -1,0 +1,40 @@
+---
+nomad_version: 1.5.1
+
+nomad_bin_path: /usr/local/bin/nomad
+
+nomad_user: nomad
+
+nomad_config_dir: /etc/nomad.d
+nomad_data_dir: /var/opt/nomad
+
+nomad_common_config_file: "{{ nomad_config_dir }}/common.hcl"
+nomad_server_config_file: "{{ nomad_config_dir }}/server.hcl"
+nomad_client_config_file: "{{ nomad_config_dir }}/client.hcl"
+
+nomad_service_file: /etc/systemd/system/nomad.service
+
+nomad_node_type: server
+
+nomad_region: rg1
+nomad_datacenter: dc1
+
+nomad_server_join_hosts:
+  - 127.0.0.1
+
+nomad_server_join_retry_max: 3
+nomad_server_join_retry_interval: 15s
+
+nomad_server_bootstrap_expect: 1
+
+nomad_ui_enabled: false
+
+# CNI plugins
+
+nomad_install_cni_plugins: false
+
+nomad_cni_plugins_version: 1.2.0
+
+nomad_cni_plugins_dl_base_dir: /opt/cni-dl/{{ nomad_cni_plugins_version }}
+nomad_cni_plugins_dl_bin_dir: "{{ nomad_cni_plugins_dl_base_dir }}/bin"
+nomad_cni_plugins_current_dir: /opt/cni

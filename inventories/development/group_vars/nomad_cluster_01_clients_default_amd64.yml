@@ -1,0 +1,10 @@
+---
+nomad_region: aws-us-east-1
+nomad_datacenter: dc1
+
+nomad_node_type: client
+
+nomad_server_join_hosts:
+  - provider=aws region=us-east-1 addr_type=private_v4 tag_key=service tag_value=nomad-cluster-01-servers
+
+nomad_install_cni_plugins: true
