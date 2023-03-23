@@ -28,3 +28,8 @@
       ansible.builtin.debug:
         msg: "{{ hostvars | to_nice_yaml(indent=2) }}"
       tags: debug:hostvars
+
+    - name: Dump 'ansible_host' attribute from hostvars
+      ansible.builtin.debug:
+        msg: "{{ hostvars.values() | map(attribute='ansible_host') }}"
+      tags: debug:ansible-host
