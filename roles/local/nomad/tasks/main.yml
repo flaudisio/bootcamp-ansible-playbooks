@@ -6,7 +6,7 @@
 
 - name: Check if Nomad {{ nomad_version }} is installed
   ansible.builtin.shell: nomad version || true
-  register: nomad_check
+  register: _nomad_check
   changed_when: false
   tags: nomad:install
 
@@ -19,8 +19,8 @@
     group: root
     mode: 0755
   when: >
-    nomad_check.stdout_lines | length == 0
-    or nomad_version not in nomad_check.stdout_lines[0]
+    _nomad_check.stdout_lines | length == 0
+    or nomad_version not in _nomad_check.stdout_lines[0]
   tags: nomad:install
 
 - name: Define nomad_user var according to the node type
