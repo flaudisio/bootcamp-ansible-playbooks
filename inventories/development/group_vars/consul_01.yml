@@ -1,0 +1,25 @@
+---
+consul_datacenter: dc1
+
+consul_retry_join_hosts:
+  - provider=aws region=us-east-1 addr_type=private_v4 tag_key=service-name tag_value=consul-01
+
+consul_node_name: "{{ tags['Name'] }}"
+consul_node_type: server
+
+consul_server_ui_enabled: true
+
+consul_server_bootstrap_expect: 3
+
+# Helper vars for readability
+_ssm_region: us-east-1
+_ssm_path_cluster: "{{ tags['ansible:ssm-path-cluster'] }}"
+_ssm_path_server: "{{ tags['ansible:ssm-path-server'] }}"
+
+consul_gossip_encrypt_key: "{{ lookup('amazon.aws.aws_ssm', _ssm_path_cluster + '/gossip-key', region=_ssm_region) }}"
+
+consul_enable_tls: true
+
+consul_tls_ca_material: "{{ lookup('amazon.aws.aws_ssm', _ssm_path_cluster + '/ca-cert', region=_ssm_region) }}"
+consul_tls_cert_material: "{{ lookup('amazon.aws.aws_ssm', _ssm_path_server + '/cert', region=_ssm_region) }}"
+consul_tls_key_material: "{{ lookup('amazon.aws.aws_ssm', _ssm_path_server + '/key', region=_ssm_region) }}"
