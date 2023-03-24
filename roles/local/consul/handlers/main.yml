@@ -1,0 +1,9 @@
+---
+- name: Reload Consul daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart Consul
+  ansible.builtin.service:
+    name: consul
+    state: restarted
