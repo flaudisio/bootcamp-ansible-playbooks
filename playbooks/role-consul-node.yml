@@ -1,0 +1,9 @@
+---
+- name: Deploy Consul nodes
+  hosts: all
+
+  roles:
+    - role: base
+      tags: [base]
+    - role: consul
+      tags: [consul]
