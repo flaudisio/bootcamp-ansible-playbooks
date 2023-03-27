@@ -1,5 +1,8 @@
 #jinja2:lstrip_blocks: True
 # {{ ansible_managed }}
+# ------------------------------------------------------------------------------
+# COMMON CONFIGURATION
+# ------------------------------------------------------------------------------
 
 datacenter = "{{ consul_datacenter }}"
 domain = "{{ consul_domain }}"
@@ -25,8 +28,18 @@ retry_max      = {{ consul_retry_join_retry_max }}
 retry_interval = "{{ consul_retry_join_retry_interval }}"
 
 {% if consul_node_type == "server" %}
+# ------------------------------------------------------------------------------
+# SERVER-ONLY CONFIGURATION
+# ------------------------------------------------------------------------------
+
 server = true
 bootstrap_expect = {{ consul_server_bootstrap_expect }}
+
+raft_protocol = 3
+
+autopilot {
+  cleanup_dead_servers = {{ consul_autopilot_cleanup_dead_servers | bool | string | lower }}
+}
 
 performance {
   raft_multiplier = 1
@@ -42,6 +55,10 @@ ui_config {
 {% endif %}
 
 {% if consul_enable_tls | bool %}
+# ------------------------------------------------------------------------------
+# TLS CONFIGURATION
+# ------------------------------------------------------------------------------
+
 tls {
   defaults {
     ca_file = "{{ consul_tls_ca_cert_file }}"

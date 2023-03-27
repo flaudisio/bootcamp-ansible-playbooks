@@ -33,6 +33,8 @@ consul_server_bootstrap_expect: 1
 
 consul_server_ui_enabled: false
 
+consul_autopilot_cleanup_dead_servers: true
+
 # TLS
 
 consul_enable_tls: false
