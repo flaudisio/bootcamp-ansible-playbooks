@@ -71,11 +71,12 @@
   ansible.builtin.template:
     src: consul.hcl.j2
     dest: "{{ consul_config_file }}"
-    owner: root
-    group: root
-    mode: 0644
+    owner: "{{ consul_user }}"
+    group: "{{ consul_user }}"
+    mode: 0600
     validate: "consul validate -config-format=hcl %s"
   notify: Restart Consul
+  no_log: "{{ ansible_verbosity < 3 }}"
   tags: consul:config
 
 - name: Include service-related tasks
