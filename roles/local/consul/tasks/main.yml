@@ -48,37 +48,24 @@
     mode: 0755
   tags: consul:config
 
-- name: Ensure required directories exist
+- name: Ensure data directory exists
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ consul_data_dir }}"
     state: directory
     owner: "{{ consul_user }}"
     group: "{{ consul_user }}"
     mode: 0700
-  loop:
-    - "{{ consul_certs_dir }}"
-    - "{{ consul_data_dir }}"
   tags: consul:config
 
-- name: Create TLS-related files
-  ansible.builtin.copy:
-    content: "{{ item.content }}"
-    dest: "{{ item.dest }}"
-    owner: "{{ consul_user }}"
-    group: "{{ consul_user }}"
-    mode: 0600
-  loop:
-    - content: "{{ consul_tls_ca_material }}"
-      dest: "{{ consul_tls_ca_file }}"
-    - content: "{{ consul_tls_cert_material }}"
-      dest: "{{ consul_tls_cert_file }}"
-    - content: "{{ consul_tls_key_material }}"
-      dest: "{{ consul_tls_key_file }}"
-  loop_control:
-    label: "{{ item.dest }}"
-  notify: Restart Consul
-  when: consul_enable_tls | bool
-  tags: consul:config
+- name: Include TLS-related tasks
+  ansible.builtin.import_tasks: tls.yml
+  when:
+    - consul_enable_tls | bool
+    - consul_tls_ca_cert_material != ""
+    - consul_tls_ca_key_material != ""
+  tags:
+    - consul:config
+    - consul:tls
 
 - name: Create config file
   ansible.builtin.template:

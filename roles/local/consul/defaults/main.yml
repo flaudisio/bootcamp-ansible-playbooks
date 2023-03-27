@@ -37,11 +37,12 @@ consul_server_ui_enabled: false
 
 consul_enable_tls: false
 
-consul_tls_ca_file: "{{ consul_certs_dir }}/ca.pem"
-consul_tls_ca_material: ""
+consul_tls_ca_cert_file: "{{ consul_certs_dir }}/ca-cert.pem"
+consul_tls_ca_cert_material: ""
 
-consul_tls_cert_file: "{{ consul_certs_dir }}/cert.pem"
-consul_tls_cert_material: ""
+consul_tls_ca_key_file: "{{ consul_certs_dir }}/ca-cert-key.pem"
+consul_tls_ca_key_material: ""
 
-consul_tls_key_file: "{{ consul_certs_dir }}/cert-key.pem"
-consul_tls_key_material: ""
+consul_tls_server_key_file: "{{ consul_certs_dir }}/server-cert-key.pem"
+consul_tls_server_csr_file: "{{ consul_certs_dir }}/server-csr.pem"
+consul_tls_server_cert_file: "{{ consul_certs_dir }}/server-cert.pem"

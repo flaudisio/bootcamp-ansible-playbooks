@@ -44,9 +44,12 @@ ui_config {
 {% if consul_enable_tls | bool %}
 tls {
   defaults {
-    ca_file = "{{ consul_tls_ca_file }}"
-    cert_file = "{{ consul_tls_cert_file }}"
-    key_file = "{{ consul_tls_key_file }}"
+    ca_file = "{{ consul_tls_ca_cert_file }}"
+
+    {% if consul_node_type == "server" %}
+    cert_file = "{{ consul_tls_server_cert_file }}"
+    key_file  = "{{ consul_tls_server_key_file }}"
+    {% endif %}
 
     verify_incoming = true
     verify_outgoing = true
@@ -58,6 +61,10 @@ tls {
 }
 
 auto_encrypt {
+  {% if consul_node_type == "server" %}
   allow_tls = true
+  {% else %}
+  tls = true
+  {% endif %}
 }
 {% endif %}

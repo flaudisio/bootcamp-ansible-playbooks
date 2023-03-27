@@ -1,0 +1,70 @@
+---
+- name: Ensure certs directory exists
+  ansible.builtin.file:
+    path: "{{ consul_certs_dir }}"
+    state: directory
+    owner: "{{ consul_user }}"
+    group: "{{ consul_user }}"
+    mode: 0700
+
+- name: Create cluster CA certificate files
+  ansible.builtin.copy:
+    content: "{{ item.data }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ consul_user }}"
+    group: "{{ consul_user }}"
+    mode: 0600
+  loop:
+    - data: "{{ consul_tls_ca_cert_material }}"
+      dest: "{{ consul_tls_ca_cert_file }}"
+    - data: "{{ consul_tls_ca_key_material }}"
+      dest: "{{ consul_tls_ca_key_file }}"
+  loop_control:
+    label: "{{ item.dest }}"
+  notify: Restart Consul
+  no_log: "{{ ansible_verbosity < 3 }}"
+
+- name: Generate server private key
+  community.crypto.openssl_privatekey:
+    path: "{{ consul_tls_server_key_file }}"
+    type: RSA
+    size: 2048
+    owner: "{{ consul_user }}"
+    group: "{{ consul_user }}"
+    mode: 0600
+    state: present
+  notify: Restart Consul
+  no_log: "{{ ansible_verbosity < 3 }}"
+
+- name: Generate server certificate signing request (CSR)
+  community.crypto.openssl_csr:
+    path: "{{ consul_tls_server_csr_file }}"
+    privatekey_path: "{{ consul_tls_server_key_file }}"
+    common_name: server.dc1.consul
+    key_usage:
+      - keyCertSign
+      - digitalSignature
+      - keyEncipherment
+    extended_key_usage:
+      - clientAuth
+      - serverAuth
+    owner: "{{ consul_user }}"
+    group: "{{ consul_user }}"
+    mode: 0600
+    state: present
+  no_log: "{{ ansible_verbosity < 3 }}"
+
+- name: Generate server certificate
+  community.crypto.x509_certificate:
+    path: "{{ consul_tls_server_cert_file }}"
+    csr_path: "{{ consul_tls_server_csr_file }}"
+    provider: ownca
+    ownca_path: "{{ consul_tls_ca_cert_file }}"
+    ownca_privatekey_path: "{{ consul_tls_ca_key_file }}"
+    ownca_not_after: +3650d
+    owner: "{{ consul_user }}"
+    group: "{{ consul_user }}"
+    mode: 0600
+    state: present
+  notify: Restart Consul
+  no_log: "{{ ansible_verbosity < 3 }}"
