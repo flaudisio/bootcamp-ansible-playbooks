@@ -13,7 +13,7 @@ node_name = "{{ consul_node_name }}"
 
 client_addr = "{{ consul_client_addr }}"
 
-encrypt = "{{ consul_gossip_encrypt_key }}"
+encrypt = "{{ consul_gossip_key }}"
 
 retry_join = [
   {% for host in consul_retry_join_hosts %}
