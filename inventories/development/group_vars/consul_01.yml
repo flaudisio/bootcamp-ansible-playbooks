@@ -17,7 +17,7 @@ consul_server_bootstrap_expect: 3
 
 consul_gossip_key: "{{ lookup('amazon.aws.aws_ssm', _ssm_cluster_path + '/gossip-key', region=_ssm_region) }}"
 
-consul_enable_tls: true
+consul_enable_tls: false
 
 consul_tls_ca_cert_material: "{{ lookup('amazon.aws.aws_ssm', _ssm_cluster_path + '/ca-cert', region=_ssm_region) }}"
 consul_tls_ca_key_material: "{{ lookup('amazon.aws.aws_ssm', _ssm_cluster_path + '/ca-key', region=_ssm_region) }}"
