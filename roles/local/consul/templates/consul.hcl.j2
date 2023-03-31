@@ -14,6 +14,7 @@ log_level = "{{ consul_log_level }}"
 node_name = "{{ consul_node_name }}"
 {% endif %}
 
+bind_addr = "{{ consul_bind_addr }}"
 client_addr = "{{ consul_client_addr }}"
 
 encrypt = "{{ consul_gossip_key }}"
