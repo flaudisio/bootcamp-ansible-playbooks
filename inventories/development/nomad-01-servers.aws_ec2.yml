@@ -6,7 +6,7 @@ strict: false
 strict_permissions: true
 leading_separator: false
 keyed_groups:
-  - key: tags["service"]
+  - key: tags["service-name"]
     prefix: ""
 hostnames:
   - private-ip-address
@@ -14,4 +14,4 @@ compose:
   ansible_host: private_ip_address
 filters:
   instance-state-name: running
-  tag:service: nomad-cluster-01-servers
+  tag:service-name: nomad-01-servers
