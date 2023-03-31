@@ -9,7 +9,7 @@ consul_client_addr: 127.0.0.1
 # Avoid error with multiple private IPs (e.g. when Docker is installed)
 consul_bind_addr: "{{ ansible_default_ipv4.address }}"
 
-consul_gossip_key: "{{ lookup('amazon.aws.aws_ssm', '/consul/consul-01/gossip-key', region=_ssm_region) }}"
+consul_gossip_key: "{{ lookup('amazon.aws.aws_ssm', '/consul/consul-01/gossip-key', region='us-east-1') }}"
 
 consul_enable_tls: false
 
