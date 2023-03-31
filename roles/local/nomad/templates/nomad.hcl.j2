@@ -1,0 +1,72 @@
+#jinja2:lstrip_blocks: True
+# {{ ansible_managed }}
+# ------------------------------------------------------------------------------
+# COMMON CONFIGURATION
+# ------------------------------------------------------------------------------
+
+region     = "{{ nomad_region }}"
+datacenter = "{{ nomad_datacenter }}"
+
+data_dir = "{{ nomad_data_dir }}"
+
+{% if nomad_node_name != "" %}
+name = "{{ nomad_node_name }}"
+{% endif %}
+
+{% if nomad_use_consul | bool %}
+consul {
+  address = "{{ nomad_consul_address }}"
+}
+{% endif %}
+
+{% if nomad_node_type == "server" %}
+# ------------------------------------------------------------------------------
+# SERVER CONFIGURATION
+# ------------------------------------------------------------------------------
+
+server {
+  enabled = true
+
+  bootstrap_expect = {{ nomad_bootstrap_expect }}
+
+  {% if not nomad_use_consul | bool %}
+  server_join {
+    retry_join = [
+      {% for host in nomad_server_join_hosts %}
+      "{{ host }}",
+      {% endfor %}
+    ]
+
+    retry_max      = {{ nomad_server_join_retry_max }}
+    retry_interval = "{{ nomad_server_join_retry_interval }}"
+  }
+  {% endif %}
+}
+
+ui {
+  enabled = {{ nomad_ui_enabled | bool | string | lower }}
+}
+{% endif %}
+
+{% if nomad_node_type == "client" %}
+# ------------------------------------------------------------------------------
+# CLIENT CONFIGURATION
+# ------------------------------------------------------------------------------
+
+client {
+  enabled = true
+
+  server_join {
+    {% if not nomad_use_consul | bool %}
+    retry_join = [
+      {% for host in nomad_server_join_hosts %}
+      "{{ host }}",
+      {% endfor %}
+    ]
+    {% endif %}
+
+    retry_max      = {{ nomad_server_join_retry_max }}
+    retry_interval = "{{ nomad_server_join_retry_interval }}"
+  }
+}
+{% endif %}

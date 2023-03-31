@@ -6,28 +6,28 @@ nomad_bin_path: /usr/local/bin/nomad
 nomad_user: nomad
 
 nomad_config_dir: /etc/nomad.d
+nomad_config_file: "{{ nomad_config_dir }}/nomad.hcl"
 nomad_data_dir: /var/opt/nomad
-
-nomad_common_config_file: "{{ nomad_config_dir }}/common.hcl"
-nomad_server_config_file: "{{ nomad_config_dir }}/server.hcl"
-nomad_client_config_file: "{{ nomad_config_dir }}/client.hcl"
-
 nomad_service_file: /etc/systemd/system/nomad.service
-
-nomad_node_type: server
 
 nomad_region: rg1
 nomad_datacenter: dc1
+
+nomad_use_consul: false
+nomad_consul_address: 127.0.0.1:8500
+
+nomad_node_name: ""
+nomad_node_type: server
+
+nomad_bootstrap_expect: 1
+
+nomad_ui_enabled: false
 
 nomad_server_join_hosts:
   - 127.0.0.1
 
 nomad_server_join_retry_max: 3
 nomad_server_join_retry_interval: 15s
-
-nomad_server_bootstrap_expect: 1
-
-nomad_ui_enabled: false
 
 # CNI plugins
 
