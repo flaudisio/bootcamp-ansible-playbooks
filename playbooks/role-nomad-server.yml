@@ -5,5 +5,7 @@
   roles:
     - role: base
       tags: [base]
+    - role: consul
+      tags: [consul]
     - role: nomad
       tags: [nomad]
