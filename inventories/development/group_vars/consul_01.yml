@@ -3,11 +3,6 @@
 _ssm_region: us-east-1
 _ssm_cluster_path: "{{ tags['ansible:ssm-cluster-path'] }}"
 
-consul_datacenter: dc1
-
-consul_retry_join_hosts:
-  - provider=aws region=us-east-1 addr_type=private_v4 tag_key=service-name tag_value=consul-01
-
 consul_node_name: "{{ instance_id }}"
 consul_node_type: server
 
