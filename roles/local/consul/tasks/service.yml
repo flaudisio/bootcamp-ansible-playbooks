@@ -1,0 +1,17 @@
+---
+- name: Create service file
+  ansible.builtin.template:
+    src: consul.service.j2
+    dest: "{{ consul_service_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Reload Consul daemon
+    - Restart Consul
+
+- name: Ensure service is running
+  ansible.builtin.service:
+    name: consul
+    state: started
+    enabled: true

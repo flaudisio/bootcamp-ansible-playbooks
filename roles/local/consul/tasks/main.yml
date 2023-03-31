@@ -1,0 +1,84 @@
+---
+- name: Include architecture-specific variables
+  ansible.builtin.include_vars:
+    file: "{{ ansible_architecture }}.yml"
+  tags: consul:install
+
+- name: Check if Consul {{ consul_version }} is installed
+  ansible.builtin.shell: consul version || true
+  register: _consul_check
+  changed_when: false
+  tags: consul:install
+
+- name: Install binary
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: "{{ consul_dl_url }}"
+    dest: "{{ consul_bin_path | dirname }}"
+    owner: root
+    group: root
+    mode: 0755
+  when: >
+    _consul_check.stdout_lines | length == 0
+    or consul_version not in _consul_check.stdout_lines[0]
+  tags: consul:install
+
+- name: Ensure Consul user group exists
+  ansible.builtin.group:
+    name: "{{ consul_user }}"
+    system: true
+    state: present
+  tags: consul:install
+
+- name: Ensure Consul user exists
+  ansible.builtin.user:
+    name: "{{ consul_user }}"
+    group: "{{ consul_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    state: present
+  tags: consul:install
+
+- name: Ensure config directory exists
+  ansible.builtin.file:
+    path: "{{ consul_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  tags: consul:config
+
+- name: Ensure data directory exists
+  ansible.builtin.file:
+    path: "{{ consul_data_dir }}"
+    state: directory
+    owner: "{{ consul_user }}"
+    group: "{{ consul_user }}"
+    mode: 0700
+  tags: consul:config
+
+- name: Include TLS-related tasks
+  ansible.builtin.import_tasks: tls.yml
+  when:
+    - consul_enable_tls | bool
+    - consul_tls_ca_cert_material != ""
+    - consul_tls_ca_key_material != ""
+  tags:
+    - consul:config
+    - consul:tls
+
+- name: Create config file
+  ansible.builtin.template:
+    src: consul.hcl.j2
+    dest: "{{ consul_config_file }}"
+    owner: "{{ consul_user }}"
+    group: "{{ consul_user }}"
+    mode: 0600
+    validate: "consul validate -config-format=hcl %s"
+  notify: Restart Consul
+  no_log: "{{ ansible_verbosity < 3 }}"
+  tags: consul:config
+
+- name: Include service-related tasks
+  ansible.builtin.import_tasks: service.yml
+  tags: consul:config

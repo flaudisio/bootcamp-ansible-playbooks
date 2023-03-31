@@ -1,0 +1,88 @@
+#jinja2:lstrip_blocks: True
+# {{ ansible_managed }}
+# ------------------------------------------------------------------------------
+# COMMON CONFIGURATION
+# ------------------------------------------------------------------------------
+
+datacenter = "{{ consul_datacenter }}"
+domain = "{{ consul_domain }}"
+
+data_dir = "{{ consul_data_dir }}"
+log_level = "{{ consul_log_level }}"
+
+{% if consul_node_name != "" %}
+node_name = "{{ consul_node_name }}"
+{% endif %}
+
+bind_addr = "{{ consul_bind_addr }}"
+client_addr = "{{ consul_client_addr }}"
+
+encrypt = "{{ consul_gossip_key }}"
+
+retry_join = [
+  {% for host in consul_retry_join_hosts %}
+  "{{ host }}",
+  {% endfor %}
+]
+
+retry_max      = {{ consul_retry_join_retry_max }}
+retry_interval = "{{ consul_retry_join_retry_interval }}"
+
+{% if consul_node_type == "server" %}
+# ------------------------------------------------------------------------------
+# SERVER-ONLY CONFIGURATION
+# ------------------------------------------------------------------------------
+
+server = true
+bootstrap_expect = {{ consul_server_bootstrap_expect }}
+
+raft_protocol = 3
+
+autopilot {
+  cleanup_dead_servers = {{ consul_autopilot_cleanup_dead_servers | bool | string | lower }}
+}
+
+performance {
+  raft_multiplier = 1
+}
+
+connect {
+  enabled = true
+}
+
+ui_config {
+  enabled = {{ consul_server_ui_enabled | bool | string | lower }}
+}
+{% endif %}
+
+{% if consul_enable_tls | bool %}
+# ------------------------------------------------------------------------------
+# TLS CONFIGURATION
+# ------------------------------------------------------------------------------
+
+tls {
+  defaults {
+    ca_file = "{{ consul_tls_ca_cert_file }}"
+
+    {% if consul_node_type == "server" %}
+    cert_file = "{{ consul_tls_server_cert_file }}"
+    key_file  = "{{ consul_tls_server_key_file }}"
+    {% endif %}
+
+    verify_incoming = true
+    verify_outgoing = true
+  }
+
+  internal_rpc {
+    verify_server_hostname = true
+  }
+}
+
+auto_encrypt {
+  {% if consul_node_type == "server" %}
+  allow_tls = true
+  {% else %}
+  tls = true
+  {% endif %}
+}
+{% endif %}
