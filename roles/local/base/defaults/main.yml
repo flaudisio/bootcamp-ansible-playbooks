@@ -7,4 +7,6 @@ base_packages:
   - unzip
   - zip
 
+base_extra_packages: []
+
 base_prune_docker_images_path: /usr/local/bin/prune-docker-images
