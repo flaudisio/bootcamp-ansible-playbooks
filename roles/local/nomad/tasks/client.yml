@@ -1,9 +1,0 @@
----
-- name: Create client config file
-  ansible.builtin.template:
-    src: client.hcl.j2
-    dest: "{{ nomad_client_config_file }}"
-    owner: root
-    group: root
-    mode: 0644
-  notify: Restart Nomad

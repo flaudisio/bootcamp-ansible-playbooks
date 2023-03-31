@@ -7,5 +7,7 @@
       tags: [base]
     - role: docker
       tags: [docker]
+    - role: consul
+      tags: [consul]
     - role: nomad
       tags: [nomad]
