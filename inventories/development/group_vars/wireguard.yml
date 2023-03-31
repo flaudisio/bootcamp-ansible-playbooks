@@ -31,8 +31,8 @@ wg_portal_company_name: Bootcamp
 
 wg_portal_admin_credentials_ssm_enabled: true
 wg_portal_admin_credentials_ssm_region: us-east-1
-wg_portal_admin_username_ssm_parameter: /wireguard/wg-portal-admin-username
-wg_portal_admin_password_ssm_parameter: /wireguard/wg-portal-admin-password
+wg_portal_admin_username_ssm_parameter: /wireguard/wg-portal/admin-username
+wg_portal_admin_password_ssm_parameter: /wireguard/wg-portal/admin-password
 
 # ------------------------------------------------------------------------------
 # caddy
