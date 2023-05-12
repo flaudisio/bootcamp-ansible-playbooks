@@ -1,0 +1,39 @@
+---
+- name: Install backup script
+  ansible.builtin.copy:
+    src: nomad-backups.sh
+    dest: "{{ nomad_backup_script_path }}"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Ensure backup directory exists
+  ansible.builtin.file:
+    path: "{{ nomad_backup_dir }}"
+    state: directory
+    owner: "{{ _nomad_user }}"
+    group: "{{ _nomad_user }}"
+    mode: 0700
+
+- name: Configure cron environment variables
+  ansible.builtin.cron:
+    env: true
+    name: PATH
+    job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+    user: "{{ _nomad_user }}"
+    cron_file: nomad-backups
+    state: present
+
+- name: Configure cron job
+  ansible.builtin.cron:
+    name: nomad-backups
+    minute: "{{ nomad_backup_cron_minute }}"
+    hour: "{{ nomad_backup_cron_hour }}"
+    day: "{{ nomad_backup_cron_day }}"
+    month: "{{ nomad_backup_cron_month }}"
+    weekday: "{{ nomad_backup_cron_weekday }}"
+    user: "{{ _nomad_user }}"
+    job: >
+      nomad-backups --cron >> {{ nomad_backup_log_path }} 2>&1
+    cron_file: nomad-backups
+    state: present

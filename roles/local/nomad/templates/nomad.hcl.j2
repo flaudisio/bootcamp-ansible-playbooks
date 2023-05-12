@@ -19,7 +19,7 @@ consul {
 }
 {% endif %}
 
-{% if nomad_node_type == "server" %}
+{% if nomad_enable_server | bool %}
 # ------------------------------------------------------------------------------
 # SERVER CONFIGURATION
 # ------------------------------------------------------------------------------
@@ -41,6 +41,10 @@ server {
     retry_interval = "{{ nomad_server_join_retry_interval }}"
   }
   {% endif %}
+
+  default_scheduler_config {
+    memory_oversubscription_enabled = {{ nomad_server_memory_oversubscription_enabled | bool | string | lower }}
+  }
 }
 
 ui {
@@ -48,7 +52,7 @@ ui {
 }
 {% endif %}
 
-{% if nomad_node_type == "client" %}
+{% if nomad_enable_client | bool %}
 # ------------------------------------------------------------------------------
 # CLIENT CONFIGURATION
 # ------------------------------------------------------------------------------
@@ -67,6 +71,17 @@ client {
 
     retry_max      = {{ nomad_server_join_retry_max }}
     retry_interval = "{{ nomad_server_join_retry_interval }}"
+  }
+
+  cni_path       = "{{ nomad_client_cni_path }}"
+  cni_config_dir = "{{ nomad_client_cni_config_dir }}"
+}
+
+plugin "docker" {
+  config {
+    volumes {
+      enabled = {{ nomad_plugin_docker_enable_volumes | bool | string | lower }}
+    }
   }
 }
 {% endif %}

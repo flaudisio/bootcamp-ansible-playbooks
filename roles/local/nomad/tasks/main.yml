@@ -2,7 +2,9 @@
 - name: Include architecture-specific variables
   ansible.builtin.include_vars:
     file: "{{ ansible_architecture }}.yml"
-  tags: nomad:install
+  tags:
+    - nomad:install
+    - nomad:cni
 
 - name: Check if Nomad {{ nomad_version }} is installed
   ansible.builtin.shell: nomad version || true
@@ -25,7 +27,7 @@
 
 - name: Define nomad_user var according to the node type
   ansible.builtin.set_fact:
-    _nomad_user: "{{ (nomad_node_type == 'server') | ternary(nomad_user, 'root') }}"
+    _nomad_user: "{{ (nomad_enable_client | bool) | ternary('root', nomad_user) }}"
   tags: nomad:config
 
 - name: Include user-related tasks
@@ -51,6 +53,13 @@
     mode: 0700
   tags: nomad:config
 
+- name: Include CNI-related tasks
+  ansible.builtin.import_tasks: cni.yml
+  when:
+    - nomad_enable_client | bool
+    - nomad_install_cni_plugins | bool
+  tags: nomad:cni
+
 - name: Create config file
   ansible.builtin.template:
     src: nomad.hcl.j2
@@ -61,13 +70,14 @@
     validate: "nomad config validate %s"
   notify: Restart Nomad
   no_log: "{{ ansible_verbosity < 3 }}"
-  tags: consul:config
+  tags: nomad:config
 
 - name: Include service-related tasks
   ansible.builtin.import_tasks: service.yml
   tags: nomad:config
 
-- name: Include CNI-related tasks
-  ansible.builtin.import_tasks: cni.yml
-  when: nomad_install_cni_plugins | bool
-  tags: nomad:cni
+- name: Include backup-related tasks
+  ansible.builtin.import_tasks: backup.yml
+  tags:
+    - nomad:config
+    - nomad:backup

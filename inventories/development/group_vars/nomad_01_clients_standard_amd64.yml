@@ -21,7 +21,7 @@ nomad_region: aws-us-east-1
 nomad_datacenter: dc1
 
 nomad_node_name: "{{ instance_id }}"
-nomad_node_type: client
+nomad_enable_client: true
 
 nomad_use_consul: true
 

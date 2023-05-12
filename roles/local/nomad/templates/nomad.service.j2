@@ -8,13 +8,8 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-{% if nomad_node_type == "server" %}
-User={{ nomad_user }}
-Group={{ nomad_user }}
-{% else %}
-User=root
-Group=root
-{% endif %}
+User={{ _nomad_user }}
+Group={{ _nomad_user }}
 
 ExecReload=/bin/kill -HUP $MAINPID
 ExecStart={{ nomad_bin_path }} agent -config {{ nomad_config_dir }}
