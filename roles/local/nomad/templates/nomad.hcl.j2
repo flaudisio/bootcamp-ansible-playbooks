@@ -76,4 +76,12 @@ client {
   cni_path       = "{{ nomad_client_cni_path }}"
   cni_config_dir = "{{ nomad_client_cni_config_dir }}"
 }
+
+plugin "docker" {
+  config {
+    volumes {
+      enabled = {{ nomad_plugin_docker_enable_volumes | bool | string | lower }}
+    }
+  }
+}
 {% endif %}

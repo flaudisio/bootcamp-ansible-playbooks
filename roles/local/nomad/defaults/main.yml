@@ -35,6 +35,8 @@ nomad_server_memory_oversubscription_enabled: true
 nomad_client_cni_path: "{{ nomad_cni_plugins_current_dir }}/bin"
 nomad_client_cni_config_dir: "{{ nomad_cni_plugins_current_dir }}/config"
 
+nomad_plugin_docker_enable_volumes: true
+
 # CNI plugins
 
 nomad_install_cni_plugins: false
