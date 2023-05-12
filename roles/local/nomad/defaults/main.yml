@@ -30,12 +30,15 @@ nomad_server_join_hosts:
 nomad_server_join_retry_max: 3
 nomad_server_join_retry_interval: 15s
 
+nomad_client_cni_path: "{{ nomad_cni_plugins_current_dir }}/bin"
+nomad_client_cni_config_dir: "{{ nomad_cni_plugins_current_dir }}/config"
+
 # CNI plugins
 
 nomad_install_cni_plugins: false
 
 nomad_cni_plugins_version: 1.2.0
 
-nomad_cni_plugins_dl_base_dir: /opt/cni-dl/{{ nomad_cni_plugins_version }}
+nomad_cni_plugins_dl_base_dir: /opt/cni/{{ nomad_cni_plugins_version }}
 nomad_cni_plugins_dl_bin_dir: "{{ nomad_cni_plugins_dl_base_dir }}/bin"
-nomad_cni_plugins_current_dir: /opt/cni
+nomad_cni_plugins_current_dir: /opt/cni/current

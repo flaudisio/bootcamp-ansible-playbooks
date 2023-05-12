@@ -68,5 +68,8 @@ client {
     retry_max      = {{ nomad_server_join_retry_max }}
     retry_interval = "{{ nomad_server_join_retry_interval }}"
   }
+
+  cni_path       = "{{ nomad_client_cni_path }}"
+  cni_config_dir = "{{ nomad_client_cni_config_dir }}"
 }
 {% endif %}
