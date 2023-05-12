@@ -17,7 +17,8 @@ nomad_use_consul: false
 nomad_consul_address: 127.0.0.1:8500
 
 nomad_node_name: ""
-nomad_node_type: server
+nomad_enable_server: false
+nomad_enable_client: false
 
 nomad_bootstrap_expect: 1
 
