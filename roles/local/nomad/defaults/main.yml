@@ -30,6 +30,8 @@ nomad_server_join_hosts:
 nomad_server_join_retry_max: 3
 nomad_server_join_retry_interval: 15s
 
+nomad_server_memory_oversubscription_enabled: true
+
 nomad_client_cni_path: "{{ nomad_cni_plugins_current_dir }}/bin"
 nomad_client_cni_config_dir: "{{ nomad_cni_plugins_current_dir }}/config"
 

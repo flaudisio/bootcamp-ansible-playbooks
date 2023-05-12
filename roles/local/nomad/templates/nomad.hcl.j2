@@ -41,6 +41,10 @@ server {
     retry_interval = "{{ nomad_server_join_retry_interval }}"
   }
   {% endif %}
+
+  default_scheduler_config {
+    memory_oversubscription_enabled = {{ nomad_server_memory_oversubscription_enabled | bool | string | lower }}
+  }
 }
 
 ui {
