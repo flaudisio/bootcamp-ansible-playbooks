@@ -75,3 +75,9 @@
 - name: Include service-related tasks
   ansible.builtin.import_tasks: service.yml
   tags: nomad:config
+
+- name: Include backup-related tasks
+  ansible.builtin.import_tasks: backup.yml
+  tags:
+    - nomad:config
+    - nomad:backup

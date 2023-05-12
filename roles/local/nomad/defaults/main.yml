@@ -44,3 +44,15 @@ nomad_cni_plugins_version: 1.2.0
 nomad_cni_plugins_dl_base_dir: /opt/cni/{{ nomad_cni_plugins_version }}
 nomad_cni_plugins_dl_bin_dir: "{{ nomad_cni_plugins_dl_base_dir }}/bin"
 nomad_cni_plugins_current_dir: /opt/cni/current
+
+# Backups
+
+nomad_backup_script_path: /usr/local/bin/nomad-backups
+nomad_backup_dir: /var/opt/nomad-backups
+nomad_backup_log_path: /var/log/nomad-backups.log
+
+nomad_backup_cron_minute: "40"
+nomad_backup_cron_hour: "*"
+nomad_backup_cron_day: "*"
+nomad_backup_cron_month: "*"
+nomad_backup_cron_weekday: "*"
