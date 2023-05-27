@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-SemaphoreConfigFile="$SEMAPHORE_CONFIG_PATH/config.json"
+readonly SemaphoreConfigFile="${SEMAPHORE_CONFIG_PATH}/config.json"
 
 : "${SSH_LOG_LEVEL:="ERROR"}"
 
@@ -50,7 +50,7 @@ configure_ssh_client()
 
 generate_config_file()
 {
-    msg "[INFO] Setting default config values"
+    msg "[INFO] Setting config values"
 
     export SEMAPHORE_WEB_ROOT="${SEMAPHORE_WEB_ROOT:-"http://localhost:3000"}"
     export SEMAPHORE_PORT="${SEMAPHORE_PORT:-""}"
@@ -119,13 +119,13 @@ case $1 in
 
         if [[ "$2" == "server" ]] ; then
             msg "[INFO] Running migrations"
-            gosu "$SEMAPHORE_USER" semaphore migrate --config "${SEMAPHORE_CONFIG_PATH}/config.json"
+            gosu "$SEMAPHORE_USER" semaphore migrate --config "$SemaphoreConfigFile"
 
             msg "[INFO] Configuring admin user"
             configure_admin_user
 
             msg "[INFO] Running Semaphore server"
-            exec gosu "$SEMAPHORE_USER" semaphore server --config "${SEMAPHORE_CONFIG_PATH}/config.json"
+            exec gosu "$SEMAPHORE_USER" semaphore server --config "$SemaphoreConfigFile"
         fi
 
         exec gosu "$SEMAPHORE_USER" "$@"
