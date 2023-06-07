@@ -1,0 +1,32 @@
+---
+- name: Install script
+  ansible.builtin.copy:
+    src: ansible-runner.sh
+    dest: /usr/local/bin/ansible-runner
+    owner: root
+    group: root
+    mode: 0755
+  tags: ansible-runner:install
+
+- name: Configure cron environment variables
+  ansible.builtin.cron:
+    env: true
+    name: PATH
+    job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+    cron_file: "{{ ansible_runner_cron_file }}"
+    state: present
+  tags: ansible-runner:cron
+
+- name: Configure ansible-runner cron job
+  ansible.builtin.cron:
+    name: "{{ ansible_runner_cron_name }}"
+    minute: "{{ ansible_runner_cron_minute }}"
+    hour: "{{ ansible_runner_cron_hour }}"
+    day: "{{ ansible_runner_cron_day }}"
+    month: "{{ ansible_runner_cron_month }}"
+    weekday: "{{ ansible_runner_cron_weekday }}"
+    user: root
+    job: ansible-runner --cron
+    cron_file: "{{ ansible_runner_cron_file }}"
+    state: present
+  tags: ansible-runner:cron
