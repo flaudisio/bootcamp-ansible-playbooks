@@ -154,7 +154,7 @@ update_playbooks_repo()
         return 0
     fi
 
-    _msg "--> Updating refs"
+    _msg "--> Fetching Playbooks repository"
 
     _run git -C "$RepoDir" fetch --all --prune --quiet
 
@@ -180,7 +180,7 @@ update_playbooks_repo()
     echo "$head_commit" > "$status_file"
 }
 
-update_ansible()
+install_or_update_ansible()
 {
     _msg "--> Installing/updating Ansible and playbook dependencies"
 
@@ -251,7 +251,7 @@ main()
             save_config
             install_system_deps
             update_playbooks_repo
-            update_ansible
+            install_or_update_ansible
             run_ansible --init
         ;;
 
@@ -261,7 +261,7 @@ main()
             load_config
             check_required_vars
             update_playbooks_repo
-            update_ansible
+            install_or_update_ansible
             run_ansible
         ;;
 
