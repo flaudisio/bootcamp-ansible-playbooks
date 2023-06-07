@@ -13,20 +13,20 @@
     env: true
     name: PATH
     job: /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-    cron_file: ansible-run
+    cron_file: "{{ ansible_run_cron_file }}"
     state: present
   tags: ansible-run:cron
 
 - name: Configure ansible-run cron job
   ansible.builtin.cron:
-    name: ansible-run
-    minute: "*/30"
-    hour: "*"
-    day: "*"
-    month: "*"
-    weekday: "*"
+    name: "{{ ansible_run_cron_name }}"
+    minute: "{{ ansible_run_cron_minute }}"
+    hour: "{{ ansible_run_cron_hour }}"
+    day: "{{ ansible_run_cron_day }}"
+    month: "{{ ansible_run_cron_month }}"
+    weekday: "{{ ansible_run_cron_weekday }}"
     user: root
     job: ansible-run --cron
-    cron_file: ansible-run
+    cron_file: "{{ ansible_run_cron_file }}"
     state: present
   tags: ansible-run:cron
