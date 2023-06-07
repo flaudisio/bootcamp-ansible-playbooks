@@ -1,5 +1,5 @@
 ---
-caddy_version: 2.6.2
+caddy_version: 2.6.4
 
 caddy_config: |
   :80 {
