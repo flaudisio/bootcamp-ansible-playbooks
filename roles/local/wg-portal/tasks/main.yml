@@ -12,6 +12,7 @@
     owner: root
     group: root
     mode: 0755
+  notify: Restart wg-portal
   tags: wg-portal:install
 
 - name: Ensure working directory exists
