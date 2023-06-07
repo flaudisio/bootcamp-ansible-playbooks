@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 #
-# ansible-run.sh
+# ansible-runner.sh
 #
-# Bootstrap and/or configure an EC2 instance using a specified service and
-# (optionally) role.
+# Bootstrap and/or configure an EC2 instance using a service and (optional) role
+# preconfigured in the specified playbooks repository.
 #
 ##
 
 set -o pipefail
 
-readonly ProgramName="ansible-run"
+readonly ProgramName="ansible-runner"
 readonly ProgramVersion="0.1.0"
 
 readonly RepoUrl="https://github.com/flaudisio/bootcamp-ansible-playbooks.git"
 readonly RepoDir="/opt/ansible-playbooks"
 readonly AnsibleVenvDir="/opt/ansible-control"
 
-readonly ConfigFile="/etc/ansible-run.conf"
-readonly LogFile="/var/log/ansible-run.log"
+readonly ConfigFile="/etc/ansible-runner.conf"
+readonly LogFile="/var/log/ansible-runner.log"
 
 # Initialize environment variables
 : "${REPO_VERSION:="main"}"

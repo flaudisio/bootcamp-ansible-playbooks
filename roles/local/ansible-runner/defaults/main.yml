@@ -1,0 +1,9 @@
+---
+ansible_runner_cron_name: ansible-runner
+ansible_runner_cron_file: "{{ ansible_runner_cron_name }}"
+
+ansible_runner_cron_minute: "*/30"
+ansible_runner_cron_hour: "*"
+ansible_runner_cron_day: "*"
+ansible_runner_cron_month: "*"
+ansible_runner_cron_weekday: "*"
