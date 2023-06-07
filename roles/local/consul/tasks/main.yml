@@ -21,6 +21,7 @@
   when: >
     _consul_check.stdout_lines | length == 0
     or consul_version not in _consul_check.stdout_lines[0]
+  notify: Restart Consul
   tags: consul:install
 
 - name: Ensure Consul user group exists
