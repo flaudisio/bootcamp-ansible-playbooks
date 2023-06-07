@@ -116,8 +116,8 @@ check_required_vars()
     _msg "--> Checking required environment variables"
 
     for var_name in "${required_vars[@]}" ; do
-        if [[ -z "${!var_name+x}" ]] ; then
-            _msg "Error: you must set the ${var_name} environment variable"
+        if [[ -z "${!var_name}" ]] ; then
+            _msg "Error: you must set the ${var_name} variable"
             error=1
         fi
     done
