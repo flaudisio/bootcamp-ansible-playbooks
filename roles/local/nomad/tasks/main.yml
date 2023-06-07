@@ -23,6 +23,7 @@
   when: >
     _nomad_check.stdout_lines | length == 0
     or nomad_version not in _nomad_check.stdout_lines[0]
+  notify: Restart Nomad
   tags: nomad:install
 
 - name: Define nomad_user var according to the node type
