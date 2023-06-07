@@ -1,5 +1,5 @@
 ---
-wg_portal_version: 1.0.16
+wg_portal_version: 1.0.17
 
 wg_portal_server_bin_path: /usr/local/bin/wg-portal
 
