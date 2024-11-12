@@ -1,6 +1,6 @@
 ---
-semaphore_image_repo: flaudisio/bootcamp-semaphore
-semaphore_image_tag: 2.8.89-debian
+semaphore_image_repo: flaudisio/semaphore
+semaphore_image_tag: 2.8.90-debian
 
 semaphore_install_dir: /opt/semaphore-docker
 semaphore_volume_base_dir: /srv/semaphore-docker
